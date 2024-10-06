@@ -1,117 +1,88 @@
-#include "AllSatSolver/AllSatSolverBase.hpp"
+#include "BoolMatchSolver/BoolMatchSolverBase.hpp"
 
 using namespace std;
 
 
-AllSatSolverBase::AllSatSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
+BoolMatchSolverBase::BoolMatchSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
 // the desire encoding
 m_CirEncoding(enc),
 m_IsDual(isDual)
 {		
 }
 
-const CirEncoding& AllSatSolverBase::GetEnc() const
+const CirEncoding& BoolMatchSolverBase::GetEnc() const
 {
     return m_CirEncoding;
 }
 
-void AllSatSolverBase::InitializeSolver(const AigerParser& aigeParser)
-{ 
+void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser)
+{
+    // update the offset for the target circuit
+    // TODO add +1?
+    m_TargetSATLitOffset = (unsigned)srcAigeParser.GetMaxIndex();
+    // check that the offset is valid
+    assert(m_TargetSATLitOffset > 0);
+
     AddClause(CONST_LIT_TRUE);
 
-    for(const AigAndGate& gate : aigeParser.GetAndGated())
+    for (const AigAndGate& gate : srcAigeParser.GetAndGated())
     {
-        HandleAndGate(gate);
+        HandleAndGate(gate, true);
+    }
+
+    for (const AigAndGate& gate : trgAigeParser.GetAndGated())
+    {
+        HandleAndGate(gate, false);
     }
 
     if (GetEnc() == DUALRAIL_ENC)
     {
         // go over the ref indexes and create a blocking clause for 1,1 case
-        const vector<bool>& isIndexRef = aigeParser.GetIsIndexRef();
-        for(size_t i = 1; i < isIndexRef.size(); i++)
+        const vector<bool>& isSrcIndexRef = srcAigeParser.GetIsIndexRef();
+        for(size_t i = 1; i < isSrcIndexRef.size(); i++)
         {
-            if (isIndexRef[i])
+            if (isSrcIndexRef[i])
             {
                 // each index represent the aig var meaning we need to *2
-                DRVAR dvar = AIGLitToDR((AIGLIT)i * 2);
+                DRVAR dvar = AIGLitToDR((AIGLIT)(i * 2), 0);
+                AddClause({-GetPos(dvar),-GetNeg(dvar)});            
+            }
+        }
+
+        const vector<bool>& isTrgIndexRef = trgAigeParser.GetIsIndexRef();
+        for(size_t i = 1; i < isTrgIndexRef.size(); i++)
+        {
+            if (isTrgIndexRef[i])
+            {
+                // each index represent the aig var meaning we need to *2
+                DRVAR dvar = AIGLitToDR((AIGLIT)(i * 2), m_TargetSATLitOffset);
                 AddClause({-GetPos(dvar),-GetNeg(dvar)});            
             }
         }
     }
 
     // Get all the the Output
-    const vector<AIGLIT>& outputs = aigeParser.GetOutputs();
+    const vector<AIGLIT>& srcOutputs = srcAigeParser.GetOutputs();
+    const vector<AIGLIT>& trgOutputs = trgAigeParser.GetOutputs();
 
-    if (outputs.size() > 1)
+
+    if (srcOutputs.size() > 1 || trgOutputs.size() > 1)
     {
-        throw runtime_error("Error, number of outputs should be 1"); 
+        throw runtime_error("Error, number of outputs should be 1 for both circuits"); 
     }
 
-    for (AIGLIT aigLitOutput : outputs)
-    {
-        HandleOutPutAssert(aigLitOutput);
-    }
-}
-
-SOLVER_RET_STATUS AllSatSolverBase::SolveUnderAssump(const INPUT_ASSIGNMENT& assmp)
-{
-    vector<SATLIT> satLitAssmp;
-
-    switch (m_CirEncoding)
-    {
-        case TSEITIN_ENC:
-        {
-            for (const pair<AIGLIT, TVal>& assign : assmp)
-            {
-                if (assign.second == TVal::True)
-                {
-                    satLitAssmp.push_back(AIGLitToSATLit(assign.first));
-                }
-                else if (assign.second == TVal::False)
-                {
-                    satLitAssmp.push_back(-AIGLitToSATLit(assign.first));
-                }
-            }
-
-        break;
-        }
-        case DUALRAIL_ENC:
-        {
-            for (const pair<AIGLIT, TVal>& assign : assmp)
-            {
-                DRVAR drVar = AIGLitToDR(assign.first);
-                if (assign.second == TVal::True)
-                {
-                    satLitAssmp.push_back(GetPos(drVar));
-                }
-                else if (assign.second == TVal::False)
-                {
-                    satLitAssmp.push_back(GetNeg(drVar));
-                }
-            }
-
-        break;
-        }
-        default:
-        {
-            throw runtime_error("Unkown circuit encoding");
-
-        break;
-        }
-    }
-
-    return SolveUnderAssump(satLitAssmp);
 }
 
 
-TVal AllSatSolverBase::GetTValFromAIGLit(AIGLIT aigLit) const
+TVal BoolMatchSolverBase::GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const
 {
     TVal val = TVal::UnKown;
+    unsigned offset = isLitFromSrc ? 0 : m_TargetSATLitOffset;
     switch (m_CirEncoding)
     {
         case TSEITIN_ENC:
         {
-            if (IsSATLitSatisfied(AIGLitToSATLit(aigLit)))
+            if (IsSATLitSatisfied(AIGLitToSATLit(aigLit, offset)))
             {
                 val = TVal::True;
             }
@@ -124,7 +95,7 @@ TVal AllSatSolverBase::GetTValFromAIGLit(AIGLIT aigLit) const
         }
         case DUALRAIL_ENC:
         {
-            DRVAR drVar = AIGLitToDR(aigLit);
+            DRVAR drVar = AIGLitToDR(aigLit, offset);
             bool isPos = IsSATLitSatisfied(GetPos(drVar));
             if (isPos)
             {
@@ -156,20 +127,20 @@ TVal AllSatSolverBase::GetTValFromAIGLit(AIGLIT aigLit) const
 }
 
 // used for getting assigment from solver for the circuit inputs
-INPUT_ASSIGNMENT AllSatSolverBase::GetAssignmentForAIGLits(const vector<AIGLIT>& aigLits) const
+INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLIT>& aigLits, bool isLitFromSrc) const
 {
     INPUT_ASSIGNMENT assignment(aigLits.size());
 
     transform(aigLits.begin(), aigLits.end(), assignment.begin(), [&](AIGLIT aigLit) -> pair<AIGLIT, TVal>
     {
-        return make_pair(aigLit, GetTValFromAIGLit(aigLit));
+        return make_pair(aigLit, GetTValFromAIGLit(aigLit, isLitFromSrc));
     });
 
     return assignment;
 }
 
 
-INPUT_ASSIGNMENT AllSatSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop, int dropt_lit_conflict_limit, bool useRecurUnCore)
+/*INPUT_ASSIGNMENT BoolMatchSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop, int dropt_lit_conflict_limit, bool useRecurUnCore)
 {
     // valid return status should be unsat
     SOLVER_RET_STATUS resStatus = UNSAT_RET_STATUS;
@@ -322,66 +293,10 @@ INPUT_ASSIGNMENT AllSatSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& initialV
     }
     
     return coreValues;
-}
-
-void AllSatSolverBase::BlockAssignment(const INPUT_ASSIGNMENT& assignment, bool blockNoRep)
-{
-    if (m_CirEncoding == TSEITIN_ENC && blockNoRep)
-    {
-        throw runtime_error("Tseitin encoding not support no reptition blocking");
-    }
-
-    vector<SATLIT> blockingClause;
-
-    switch (m_CirEncoding)
-    {
-        case TSEITIN_ENC:
-        {
-            for (const pair<AIGLIT, TVal>& assign : assignment)
-            {
-                if (assign.second == TVal::True)
-                {
-                    blockingClause.push_back(-AIGLitToSATLit(assign.first));
-                }
-                else if (assign.second == TVal::False)
-                {
-                    blockingClause.push_back(AIGLitToSATLit(assign.first));
-                }
-            }
-
-        break;
-        }
-        case DUALRAIL_ENC:
-        {
-            for (const pair<AIGLIT, TVal>& assign : assignment)
-            {
-                DRVAR drVar = AIGLitToDR(assign.first);
-                if (assign.second == TVal::True)
-                {
-                    blockingClause.push_back( !blockNoRep ? -GetPos(drVar) : GetNeg(drVar));
-                }
-                else if (assign.second == TVal::False)
-                {
-                    blockingClause.push_back( !blockNoRep ? -GetNeg(drVar) : GetPos(drVar));
-                }
-            }
-
-        break;
-        }
-        default:
-        {
-            throw runtime_error("Unkown circuit encoding");
-
-        break;
-        }
-    }
-
-    // if assignment is empty add empty clause
-    AddClause(blockingClause);
-}
+}*/
 
 
-void AllSatSolverBase::WriteAnd(SATLIT l, SATLIT r1, SATLIT r2)
+void BoolMatchSolverBase::WriteAnd(SATLIT l, SATLIT r1, SATLIT r2)
 {
     AddClause({l, -r1, -r2});
     AddClause({-l, r1});
@@ -389,31 +304,33 @@ void AllSatSolverBase::WriteAnd(SATLIT l, SATLIT r1, SATLIT r2)
 }
 
 
-void AllSatSolverBase::WriteOr(SATLIT l, SATLIT r1, SATLIT r2)
+void BoolMatchSolverBase::WriteOr(SATLIT l, SATLIT r1, SATLIT r2)
 {
     WriteAnd(-l, -r1, -r2);
 }
 
-void AllSatSolverBase::HandleAndGate(const AigAndGate& gate)
+void BoolMatchSolverBase::HandleAndGate(const AigAndGate& gate, bool isSrcGate)
 {
     AIGLIT l = gate.GetL();
     AIGLIT r0 = gate.GetR0();
     AIGLIT r1 = gate.GetR1();
+
+    unsigned offset = isSrcGate ? 0 : m_TargetSATLitOffset;
 
     switch (m_CirEncoding)
     {
         case TSEITIN_ENC:
         {
             // write and gate using the index variables
-            WriteAnd(AIGLitToSATLit(l), AIGLitToSATLit(r0), AIGLitToSATLit(r1));
+            WriteAnd(AIGLitToSATLit(l, offset), AIGLitToSATLit(r0, offset), AIGLitToSATLit(r1, offset));
 
         break;
         }
         case DUALRAIL_ENC:
         {
-            DRVAR drL = AIGLitToDR(l);
-            DRVAR drR0 = AIGLitToDR(r0);
-            DRVAR drR1 = AIGLitToDR(r1);
+            DRVAR drL = AIGLitToDR(l, offset);
+            DRVAR drR0 = AIGLitToDR(r0, offset);
+            DRVAR drR1 = AIGLitToDR(r1, offset);
 
             WriteAnd(GetPos(drL), GetPos(drR0), GetPos(drR1) );
             WriteOr(GetNeg(drL), GetNeg(drR0), GetNeg(drR1) );
@@ -423,49 +340,6 @@ void AllSatSolverBase::HandleAndGate(const AigAndGate& gate)
         default:
         {
             throw runtime_error("Unkown circuit encoding");
-
-        break;
-        }
-    }
-}
-
-void AllSatSolverBase::HandleOutPutAssert(AIGLIT outLit)
-{
-    switch (m_CirEncoding)
-    {
-        case TSEITIN_ENC:
-        {
-            SATLIT out = AIGLitToSATLit(outLit);
-            if (!m_IsDual)
-            {
-                AddClause(out);
-            }
-            else
-            {
-                AddClause(-out);
-            }
-            
-        break;
-        }
-        case DUALRAIL_ENC:
-        {
-            DRVAR outdr = AIGLitToDR(outLit);
-            if (!m_IsDual)
-            {
-                AddClause(GetPos(outdr));
-                AddClause(-GetNeg(outdr));
-            }
-            else
-            {
-                AddClause(-GetPos(outdr));
-                AddClause(GetNeg(outdr));
-            }
-
-        break;
-        }
-        default:
-        {
-            throw runtime_error("Unkown cir encoding");
 
         break;
         }

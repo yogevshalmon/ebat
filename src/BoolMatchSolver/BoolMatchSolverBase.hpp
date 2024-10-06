@@ -2,22 +2,22 @@
 
 #include <vector>
 
-#include "Globals/AllSatGloblas.hpp"
-#include "Globals/AllSatSolverGloblas.hpp"
+#include "Globals/BoolMatchGloblas.hpp"
+#include "Globals/BoolMatchSolverGloblas.hpp"
 #include "Aiger/AigerParser.hpp"
 #include "Utilities/InputParser.hpp"
 
 /*
-    base class for allsat solver
+    base class for boolean match solver that use SAT solver
     provide some general functonallity
 */
-class AllSatSolverBase 
+class BoolMatchSolverBase
 {
     public:
 
-        AllSatSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual);
+        BoolMatchSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual);
 
-        virtual ~AllSatSolverBase() 
+        virtual ~BoolMatchSolverBase() 
         {
         }
 
@@ -37,8 +37,10 @@ class AllSatSolverBase
             std::vector<SATLIT> v(lits); return AddClause(v); 
         }
 
-        // initialize solver from aig
-        void InitializeSolver(const AigerParser& aigeParser);
+        // initialize solver from the aigs of the src and trg
+        // the conversion of the source circuit is done by using the SAT lit converted from the AIG lit
+        // the target circuit need to have some offset to avoid conflict with the source circuit
+        void InitializeSolver(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser);
 
         // return ipasir status
         virtual SOLVER_RET_STATUS Solve()
@@ -51,10 +53,6 @@ class AllSatSolverBase
         {
             throw std::runtime_error("Function not implemented");
         }
-
-        // Ignore asssmp of dont care values
-        // return ipasir status
-        SOLVER_RET_STATUS SolveUnderAssump(const INPUT_ASSIGNMENT& assmp);
 
         // if conflict_limit > 0 set the conflict limit for the next call
         virtual void SetConflictLimit(int conflict_limit)
@@ -78,10 +76,10 @@ class AllSatSolverBase
         const CirEncoding& GetEnc() const;
 
         // value from AIG index, used only on the circuit inputs
-        TVal GetTValFromAIGLit(AIGLIT aigLit) const;
+        TVal GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const;
 
         // used for getting assigment from solver for the circuit inputs
-        INPUT_ASSIGNMENT GetAssignmentForAIGLits(const std::vector<AIGLIT>& aigLits) const;
+        INPUT_ASSIGNMENT GetAssignmentForAIGLits(const std::vector<AIGLIT>& aigLits, bool isLitFromSrc) const;
 
         // get unsat core under the assumption of initialValues
         // return result assignment of the core
@@ -89,11 +87,7 @@ class AllSatSolverBase
         // useLitDrop - if to use literal dropping startegy
         // dropt_lit_conflict_limit - limit the conflict limit for each check for drop lit
         // useRecurUnCore - if to use unsat core extraction recursivly with each drop lit check
-        INPUT_ASSIGNMENT GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop = false, int dropt_lit_conflict_limit = -1, bool useRecurUnCore = false);
-        
-        // block the current assignment
-        // currently blockNoRep only work for dual-rail encoding
-        void BlockAssignment(const INPUT_ASSIGNMENT& assignment, bool blockNoRep = false);
+        //INPUT_ASSIGNMENT GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop = false, int dropt_lit_conflict_limit = -1, bool useRecurUnCore = false);
 
     protected:
 
@@ -115,7 +109,9 @@ class AllSatSolverBase
 		// write the and operation l = r1 | r2
 		void WriteOr(SATLIT l, SATLIT r1, SATLIT r2);
 
-        void HandleAndGate(const AigAndGate& gate);
+        // handle the and gate, write the correspond clauses
+        // isSrcGate - if the gate is from the source circuit or the target circuit
+        void HandleAndGate(const AigAndGate& gate, bool isSrcGate);
 
         void HandleOutPutAssert(AIGLIT outLit);
         
@@ -129,6 +125,7 @@ class AllSatSolverBase
 		
         // *** Variables ***
 
+        unsigned m_TargetSATLitOffset = 0;
 
 		// *** Stats ***
 
