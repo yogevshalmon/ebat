@@ -3,8 +3,8 @@
 #include <queue>
 #include <vector>
 
-#include "Globals/AllSatGloblas.hpp"
-#include "Globals/AllSatSolverGloblas.hpp"
+#include "Globals/BoolMatchGloblas.hpp"
+#include "Globals/BoolMatchSolverGloblas.hpp"
 #include "Globals/TernaryVal.hpp"
 #include "Aiger/AigerParser.hpp"
 
