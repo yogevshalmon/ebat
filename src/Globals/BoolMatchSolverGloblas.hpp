@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Globals/AllSatGloblas.hpp"
+#include "Globals/BoolMatchGloblas.hpp"
 #include "Globals/TernaryVal.hpp"
 
 // encodings values enum
