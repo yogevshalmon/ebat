@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "lorina/aiger.hpp"
-#include "Globals/AllSatGloblas.hpp"
+#include "Globals/BoolMatchGloblas.hpp"
 #include "Aiger/AigAndGate.hpp"
 
 /*
