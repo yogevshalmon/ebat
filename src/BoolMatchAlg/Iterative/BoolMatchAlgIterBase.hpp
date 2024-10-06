@@ -35,11 +35,6 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
             throw std::runtime_error("Function not implemented"); 
         };
         
-        // implement how to block, dr encoding can have more than one option
-        virtual void BlockModel(const INPUT_ASSIGNMENT& model)
-        { 
-            throw std::runtime_error("Function not implemented"); 
-        };
 
         // *** Params ***
 
