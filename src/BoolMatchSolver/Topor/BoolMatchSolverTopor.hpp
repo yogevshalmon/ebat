@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "AllSatSolver/AllSatSolverBase.hpp"
+#include "BoolMatchSolver/BoolMatchSolverBase.hpp"
 #include "Globals/ToporGlobal.hpp"
 
 
@@ -10,13 +10,13 @@
     base class for allsat solver
     provide some general functonallity
 */
-class AllSatSolverTopor : public AllSatSolverBase
+class BoolMatchSolverTopor : public BoolMatchSolverBase
 {
     public:
 
-        AllSatSolverTopor(const InputParser& inputParser, const CirEncoding& enc, const bool isDual);
+        BoolMatchSolverTopor(const InputParser& inputParser, const CirEncoding& enc, const bool isDual);
 
-        virtual ~AllSatSolverTopor();
+        virtual ~BoolMatchSolverTopor();
 
         // add clause to solver
         void AddClause(std::vector<SATLIT>& cls);

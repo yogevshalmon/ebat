@@ -1,12 +1,12 @@
-#include "AllSatSolver/Ipasir/AllSatSolverIpasir.hpp"
+#include "BoolMatchSolver/Ipasir/BoolMatchSolverIpasir.hpp"
 
-#include "Globals/AllSatAlgoGlobals.hpp"
+#include "Globals/BoolMatchAlgGlobals.hpp"
 #include "Globals/ipasir.h"
 
 using namespace std;
 
-AllSatSolverIpasir::AllSatSolverIpasir(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
-AllSatSolverBase(inputParser, enc, isDual),
+BoolMatchSolverIpasir::BoolMatchSolverIpasir(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
+BoolMatchSolverBase(inputParser, enc, isDual),
 // if timeout was given
 m_UseTimeOut(inputParser.cmdOptionExists("/general/timeout")),
 // check if timeout is given in command
@@ -16,12 +16,12 @@ m_IpasirSolver(nullptr)
     m_IpasirSolver = ipasir_init();
 }
 
-AllSatSolverIpasir::~AllSatSolverIpasir() 
+BoolMatchSolverIpasir::~BoolMatchSolverIpasir() 
 {
     ipasir_release (m_IpasirSolver);
 }
 
-void AllSatSolverIpasir::AddClause(vector<SATLIT>& cls)
+void BoolMatchSolverIpasir::AddClause(vector<SATLIT>& cls)
 {
     for (SATLIT lit : cls)
     {
@@ -31,12 +31,12 @@ void AllSatSolverIpasir::AddClause(vector<SATLIT>& cls)
     ipasir_add(m_IpasirSolver, 0);
 }
 
-SOLVER_RET_STATUS AllSatSolverIpasir::Solve()
+SOLVER_RET_STATUS BoolMatchSolverIpasir::Solve()
 {
     return ipasir_solve(m_IpasirSolver);
 }
 
-SOLVER_RET_STATUS AllSatSolverIpasir::SolveUnderAssump(std::vector<SATLIT>& assmp)
+SOLVER_RET_STATUS BoolMatchSolverIpasir::SolveUnderAssump(std::vector<SATLIT>& assmp)
 {
     lastAssmp = assmp;
     for (SATLIT lit : assmp)
@@ -48,13 +48,13 @@ SOLVER_RET_STATUS AllSatSolverIpasir::SolveUnderAssump(std::vector<SATLIT>& assm
 }
 
 
-bool AllSatSolverIpasir::IsSATLitSatisfied(SATLIT lit) const
+bool BoolMatchSolverIpasir::IsSATLitSatisfied(SATLIT lit) const
 {
     return ipasir_val(m_IpasirSolver, lit) > 0;
 }
 
 // check if assumption at pos is required
-bool AllSatSolverIpasir::IsAssumptionRequired(size_t pos)
+bool BoolMatchSolverIpasir::IsAssumptionRequired(size_t pos)
 {   
     return ipasir_failed(m_IpasirSolver, lastAssmp[pos]) == 1;
 }

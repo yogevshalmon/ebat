@@ -1,12 +1,12 @@
-#include "AllSatSolver/Topor/AllSatSolverTopor.hpp"
+#include "BoolMatchSolver/Topor/BoolMatchSolverTopor.hpp"
 
-#include "Globals/AllSatAlgoGlobals.hpp"
+#include "Globals/BoolMatchAlgGlobals.hpp"
 
 using namespace std;
 using namespace Topor;
 
-AllSatSolverTopor::AllSatSolverTopor(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
-AllSatSolverBase(inputParser, enc, isDual),
+BoolMatchSolverTopor::BoolMatchSolverTopor(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
+BoolMatchSolverBase(inputParser, enc, isDual),
 // default is mode 5
 m_SatSolverMode(inputParser.getUintCmdOption("/sat_solver/intel_sat/mode", 5)),
 // if timeout was given
@@ -26,43 +26,43 @@ m_ToporSolver(nullptr)
     }
 }
 
-AllSatSolverTopor::~AllSatSolverTopor() 
+BoolMatchSolverTopor::~BoolMatchSolverTopor() 
 {
     delete m_ToporSolver;
 }
 
-void AllSatSolverTopor::AddClause(vector<SATLIT>& cls)
+void BoolMatchSolverTopor::AddClause(vector<SATLIT>& cls)
 {
     m_ToporSolver->AddClause(cls);
 }
 
-SOLVER_RET_STATUS AllSatSolverTopor::Solve()
+SOLVER_RET_STATUS BoolMatchSolverTopor::Solve()
 {
     return GetToporResult(m_ToporSolver->Solve());
 }
 
-SOLVER_RET_STATUS AllSatSolverTopor::SolveUnderAssump(std::vector<SATLIT>& assmp)
+SOLVER_RET_STATUS BoolMatchSolverTopor::SolveUnderAssump(std::vector<SATLIT>& assmp)
 {
     return GetToporResult(m_ToporSolver->Solve(assmp));
 }
 
-void AllSatSolverTopor::FixPolarity(SATLIT lit)
+void BoolMatchSolverTopor::FixPolarity(SATLIT lit)
 {
     m_ToporSolver->FixPolarity(lit);
 }
 
-void AllSatSolverTopor::BoostScore(SATLIT lit)
+void BoolMatchSolverTopor::BoostScore(SATLIT lit)
 {
     m_ToporSolver->BoostScore(lit);
 }
 
-bool AllSatSolverTopor::IsSATLitSatisfied(SATLIT lit) const
+bool BoolMatchSolverTopor::IsSATLitSatisfied(SATLIT lit) const
 {
     return m_ToporSolver->GetLitValue(lit) == TToporLitVal::VAL_SATISFIED;
 }
 
 // check if assumption at pos is required
-bool AllSatSolverTopor::IsAssumptionRequired(size_t pos)
+bool BoolMatchSolverTopor::IsAssumptionRequired(size_t pos)
 {   
     return m_ToporSolver->IsAssumptionRequired(pos);
 }

@@ -2,20 +2,20 @@
 
 #include <vector>
 
-#include "AllSatSolver/AllSatSolverBase.hpp"
+#include "BoolMatchSolver/BoolMatchSolverBase.hpp"
 
 
 /*
     base class for allsat solver
     provide some general functonallity
 */
-class AllSatSolverIpasir : public AllSatSolverBase
+class BoolMatchSolverIpasir : public BoolMatchSolverBase
 {
     public:
 
-        AllSatSolverIpasir(const InputParser& inputParser, const CirEncoding& enc, const bool isDual);
+        BoolMatchSolverIpasir(const InputParser& inputParser, const CirEncoding& enc, const bool isDual);
 
-        virtual ~AllSatSolverIpasir();
+        virtual ~BoolMatchSolverIpasir();
 
         // add clause to solver
         void AddClause(std::vector<SATLIT>& cls);
