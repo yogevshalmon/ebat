@@ -1,5 +1,5 @@
 #pragma once
 
-#include "AllSatSolver/Topor/AllSatSolverTopor.hpp"
+#include "BoolMatchSolver/Topor/BoolMatchSolverTopor.hpp"
 
-#include "AllSatSolver/Ipasir/AllSatSolverIpasir.hpp"
+#include "BoolMatchSolver/Ipasir/BoolMatchSolverIpasir.hpp"
