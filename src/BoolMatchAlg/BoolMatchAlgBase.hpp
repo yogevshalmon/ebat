@@ -16,7 +16,7 @@ class BoolMatchAlgBase
 {
     public:
 
-        AllSatAlgoBase(const InputParser& inputParser);
+        BoolMatchAlgBase(const InputParser& inputParser);
 
         virtual ~BoolMatchAlgBase();
 
@@ -63,9 +63,11 @@ class BoolMatchAlgBase
         AigerParser m_AigParserSrc;
         AigerParser m_AigParserTrg;
 
-        // original inputs
-        std::vector<AIGLIT> m_Inputs;
-        // size of m_Inputs
+        // original inputs for the src circuit
+        std::vector<AIGLIT> m_SrcInputs;
+        // original inputs for the trg circuit
+        std::vector<AIGLIT> m_TrgInputs;
+        // size of m_Inputs (should be the same for src and trg)
         size_t m_InputSize;
 
 		// *** Stats ***
