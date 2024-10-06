@@ -52,30 +52,31 @@ static constexpr SATLIT CONST_LIT_FALSE = -1;
 // return the sat lit for each AIG lit
 // defined as the correspond aig index + 1 
 // save the 1 lit for TRUE\FALSE const
-inline static SATLIT AIGLitToSATLit(AIGLIT lit)
+// offset - if to use an offset for the SAT lit, usefull for the encoding of the target circuit
+inline static SATLIT AIGLitToSATLit(AIGLIT lit, unsigned offset)
 {
-    if( lit == 0)
+    if (lit == 0)
         return CONST_LIT_FALSE;
-    if( lit == 1)
+    if (lit == 1)
         return CONST_LIT_TRUE;
-    // even
-    if( (lit & 1) == 0)
-        return ((SATLIT)AIGLitToAIGIndex(lit) + 1);
-    else // odd
-        return -((SATLIT)AIGLitToAIGIndex(lit) + 1);  
+    
+    if (IsAIGLitNeg(lit))
+        return -((SATLIT)AIGLitToAIGIndex(lit) + 1 + offset);
+    else 
+        return ((SATLIT)AIGLitToAIGIndex(lit) + 1 + offset);  
 }
 
 // return the sat lit for each AIG lit
 // defined as the correspond aig index + 1 
 // save the 1 lit for TRUE\FALSE const
-inline static AIGINDEX SATLitToAIGIndex(SATLIT lit)
+inline static AIGINDEX SATLitToAIGIndex(SATLIT lit, unsigned offset)
 {
     if( lit == CONST_LIT_FALSE)
         return 0;
     if( lit == CONST_LIT_TRUE)
         return 1;
 
-    return (abs(lit) - 1);   
+    return (abs(lit) - 1 - offset);   
 }
 
 
@@ -99,29 +100,31 @@ inline static SATLIT GetNeg(const DRVAR& dvar)
 // Get the two var represent the var_pos and var_neg from AIGLIT
 // if even i.e. 2 return 2,3
 // else odd i.e. 3 return 3,2
-inline static DRVAR AIGLitToDR(AIGLIT var)
+// offset - if to use an offset for the SAT lit, usefull for the encoding of the target circuit
+// NOTE: since the offset is according to the index we need to multiply by 2
+inline static DRVAR AIGLitToDR(AIGLIT var, unsigned offset)
 {
     // special case for constant TRUE\FALSE
     if( var == 0)
         return {CONST_LIT_FALSE, CONST_LIT_TRUE};
     if( var == 1)
         return {CONST_LIT_TRUE, CONST_LIT_FALSE};
+
+    SATLIT baseLit = var + 2*offset;
     // even
     if( (var & 1) == 0)
-        return {var, var + 1};
+        return {baseLit, baseLit + 1};
     else // odd
-        return {var, var - 1};
+        return {baseLit, baseLit - 1};
 }
 
-
-inline static AIGLIT DRToAIGLit(const DRVAR& drvar)
+// get the AIG lit from the dual rail variable that represent the positive value
+inline static AIGLIT DRToAIGLit(const DRVAR& drvar, unsigned offset)
 {
-    return (AIGLIT)GetPos(drvar);
+    return (AIGLIT)(GetPos(drvar) - 2*offset);
 }
 
-inline static AIGINDEX DRToAIGIndex(const DRVAR& drvar)
+inline static AIGINDEX DRToAIGIndex(const DRVAR& drvar, unsigned offset)
 {
-    return AIGLitToAIGIndex(((AIGLIT)GetPos(drvar)));
+    return AIGLitToAIGIndex(DRToAIGLit(drvar, offset));
 }
-
-
