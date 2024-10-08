@@ -1,24 +1,24 @@
 #include <iostream>
 #include <signal.h>
 
-#include "Globals/AllSatGloblas.hpp"
-#include "Globals/AllSatAlgoGlobals.hpp"
-#include "AllSatAlgo/Algorithms.hpp"
+#include "Globals/BoolMatchGloblas.hpp"
+#include "Globals/BoolMatchAlgGlobals.hpp"
+#include "BoolMatchAlg/Algorithms.hpp"
 
 
 using namespace std;
 
 // define global algo for sigHandling
-AllSatAlgoBase* allSatAlgo = nullptr;
+BoolMatchAlgBase* boolMatchAlg = nullptr;
 
 // function for handling sig
 // just print the result with wasInterrupted = true
 void sigHandler(int s){
     printf("Caught signal %d\n",s);
-    if(allSatAlgo != nullptr)
+    if(boolMatchAlg != nullptr)
     {
-        allSatAlgo->PrintResult(true);
-        delete allSatAlgo;
+        boolMatchAlg->PrintResult(true);
+        delete boolMatchAlg;
     }
     exit(1); 
 }
@@ -26,9 +26,10 @@ void sigHandler(int s){
 void PrintUsage()
 {
     // TODO add additonal param like outfile, max models etc..
-    cout << "USAGE: ./hall_tool <input_file_name> [</mode> <mode_name>] [additonal parameters]" << endl;
-    cout << "where <input_file_name> is the path to a .aag or .aig instance in AIGER format" << endl << endl;
-    // cout << "you can provide a pre-configured algorithm <mode_name> where " << DEF_ALG << " is the defualt one" << endl;
+    cout << "USAGE: ./boolmatch_tool <source_file_path> <target_file_path> [</mode> <mode_name>] [additonal parameters]" << endl;
+    cout << "where <source_file_path> is the path to a .aag or .aig instance in AIGER format of the source circuit"<< endl;
+    cout << "where <target_file_path> is the path to a .aag or .aig instance in AIGER format of the target circuit"<< endl;
+
     cout << "\t accepted <mode_name> are [";
     for (size_t i = 0; i < MODES.size(); i++) {
         if (i != 0) {
@@ -37,26 +38,21 @@ void PrintUsage()
         std::cout << MODES[i];
     }
     cout << "]" << endl;
-    cout << "\t for example: ./hall_tool <input_file_name> /mode " << TERSIM_ALG << endl;
-    cout << "\t default mode is: " << ROC_ALG << endl;
+    cout << "\t for example: ./boolmatch_tool <input_file_name> /mode " << NAIVE_ALG << endl;
+    cout << "\t default mode is: " << NAIVE_ALG << endl;
 
     // additonal parameters
     cout << endl;
     cout << "additonal parameters can be provided in [additonal parameters]:" << endl;
-    cout << "Runnig example: \n\t ./hall_tool ../benchmarks/AND.aag /mode core /general/timeout 60 /general/print_enumer 1" << endl;
+    cout << "Runnig example: \n\t ./boolmatch_tool ../benchmarks/AND.aag /mode core /general/timeout 60 /general/print_matches 0" << endl;
 
     cout << endl;
     cout << "General:" << endl;
-    cout << "[</general/timeout> <value>] provide timeout in seconds, if <value> not provided use default of 3600 sec" << endl;
-    cout << "[</general/print_enumer> <0|1>] represent if to print the enumerations found" << endl;
+    cout << "[</general/timeout> <value>] provide timeout in seconds, if <value> not provided use default of " << DEF_TIMEOUT << " sec" << endl;
+    cout << "[</general/print_matches> <0|1>] represent if to print the found matches" << endl;
 
     cout << endl;
     cout << "Algorithm parameters:" << endl;
-
-    cout << "[</alg/blocking/use_cirsim> <0|1>] if to use ternary simulation in the generalization" << endl;
-    cout << "[</alg/blocking/use_top_to_bot_sim> <0|1>] if to use top to bottom simulation instead of bottom to top" << endl;
-    cout << "[</alg/blocking/use_ucore> <0|1>] if to use unSAT-core in the generalization" << endl;
-    cout << "[</alg/blocking/use_lit_drop> <0|1>] if to use unSAT-core minimazation with literal dropping" << endl;   
 }
 
 
@@ -64,13 +60,13 @@ int main(int argc, char **argv)
 {
     InputParser cmdInput(argc, argv);
 
-    if(argc < 2 || cmdInput.cmdOptionExists("-h") || cmdInput.cmdOptionExists("--h") || cmdInput.cmdOptionExists("-help") || cmdInput.cmdOptionExists("--help"))
+    if(argc < 3 || cmdInput.cmdOptionExists("-h") || cmdInput.cmdOptionExists("--h") || cmdInput.cmdOptionExists("-help") || cmdInput.cmdOptionExists("--help"))
     {
         PrintUsage();
         return 1;
     }
 
-    string mode = cmdInput.getCmdOptionWDef("/mode", "roc");
+    string mode = cmdInput.getCmdOptionWDef("/mode", NAIVE_ALG);
     if (!mode.empty())
     {
         auto itMap = MODE_PARAMS.find(mode);
@@ -90,21 +86,17 @@ int main(int argc, char **argv)
     }
 
     // no dual-rail if cmd option or mode is tersim
-    string alg = cmdInput.getCmdOptionWDef("/alg", "blocking");
+    string alg = cmdInput.getCmdOptionWDef("/alg", "iter");
 
-    string blockingEnc = cmdInput.getCmdOptionWDef("/alg/blocking/enc", "tseitin");
+    string blockingEnc = cmdInput.getCmdOptionWDef("/alg/iter/enc", "tseitin");
 
     try
     {
-        if (alg == "blocking")
+        if (alg == "iter")
         {
             if (blockingEnc == "tseitin")
             {
-                allSatAlgo = new AllSatAlgoTseitinEnc(cmdInput);
-            }
-            else if (blockingEnc == "dual_rail")
-            {  
-                allSatAlgo = new AllSatAlgoDualRailEnc(cmdInput);
+                boolMatchAlg = new BoolMatchAlgIterTseitinEnc(cmdInput);
             }
             else
             {
@@ -118,11 +110,11 @@ int main(int argc, char **argv)
             return -1;
         }
         
-        allSatAlgo->InitializeWithAIGFile(argv[1]);    
+        boolMatchAlg->InitializeFromAIGs(argv[1], argv[2]);    
     }
     catch (exception& ex)
     {
-        delete allSatAlgo;
+        delete boolMatchAlg;
         cout << "Error while initilize the solver: " << ex.what() << endl;
         return -1;
     }
@@ -139,17 +131,17 @@ int main(int argc, char **argv)
 
     try
     { 
-        allSatAlgo->FindAllEnumer();
-        allSatAlgo->PrintResult();
+        boolMatchAlg->FindAllMatches();
+        boolMatchAlg->PrintResult();
     }
     catch (exception& ex)
     {
-        delete allSatAlgo;
+        delete boolMatchAlg;
         cout << "Error acord: " << ex.what() << endl;
         return -1;
     }
 
-    delete allSatAlgo;
+    delete boolMatchAlg;
 
     return 0;
 }
