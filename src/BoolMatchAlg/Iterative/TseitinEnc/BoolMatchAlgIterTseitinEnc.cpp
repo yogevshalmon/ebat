@@ -37,7 +37,7 @@ BoolMatchAlgIterTseitinEnc::~BoolMatchAlgIterTseitinEnc()
 
 void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
 {
-    AllSatAlgoBlockingBase::PrintInitialInformation();
+    BoolMatchAlgIterBase::PrintInitialInformation();
 
     cout << "c Use Tseitin encoding" << endl;   
 }

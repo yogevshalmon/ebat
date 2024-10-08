@@ -19,7 +19,8 @@ m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/iter/lit_drop_conflict
 m_LitDropChekRecurCore(inputParser.getBoolCmdOption("/alg/iter/lit_drop_recur_ucore", false)),
 m_Solver(nullptr), 
 m_DualSolver(nullptr), 
-m_CirSimulation(nullptr)
+m_SrcCirSimulation(nullptr),
+m_TrgCirSimulation(nullptr)
 {
 }
 
@@ -79,7 +80,7 @@ void BoolMatchAlgIterBase::FindAllMatches()
         // if timeout exit skip check for tautology
         if (m_IsTimeOut)
         {
-            break;
+            //break;
         }
 
         unsigned currNumOfDC = GetNumOfDCFromInputAssignment(minAssignment); 
@@ -93,7 +94,7 @@ void BoolMatchAlgIterBase::FindAllMatches()
         {
             if (m_PrintMatches)
             {
-                PrintEnumr(minAssignment);
+                PrintModel(minAssignment);
             }
         }
 
@@ -118,7 +119,7 @@ void BoolMatchAlgIterBase::FindAllMatches()
 
 void BoolMatchAlgIterBase::PrintInitialInformation()
 {
-    AllSatAlgoBase::PrintInitialInformation();
+    BoolMatchAlgBase::PrintInitialInformation();
 
     cout << "c Use Iterative based algorithm" << endl;
 
