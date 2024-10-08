@@ -6,8 +6,7 @@
 
 
 /*
-    base class for allsat solver
-    provide some general functonallity
+    Use Ipasir SAT solver for boolean matching
 */
 class BoolMatchSolverIpasir : public BoolMatchSolverBase
 {

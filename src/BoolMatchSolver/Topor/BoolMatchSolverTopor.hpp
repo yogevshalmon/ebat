@@ -7,8 +7,7 @@
 
 
 /*
-    base class for allsat solver
-    provide some general functonallity
+    Use Topor SAT solver for boolean matching
 */
 class BoolMatchSolverTopor : public BoolMatchSolverBase
 {
