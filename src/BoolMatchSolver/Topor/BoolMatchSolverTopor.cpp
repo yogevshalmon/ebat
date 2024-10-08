@@ -33,6 +33,10 @@ BoolMatchSolverTopor::~BoolMatchSolverTopor()
 
 void BoolMatchSolverTopor::AddClause(vector<SATLIT>& cls)
 {
+    for (SATLIT lit : cls)
+    {
+        HandleNewSATLit(lit);
+    }
     m_ToporSolver->AddClause(cls);
 }
 

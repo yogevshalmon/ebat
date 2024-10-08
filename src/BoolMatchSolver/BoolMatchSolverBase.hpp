@@ -37,6 +37,9 @@ public:
         std::vector<SATLIT> v(lits); return AddClause(v); 
     }
 
+    // return the next available SAT lit
+    SATLIT GetNewVar();
+
     // initialize solver from the aigs of the src and trg
     // the conversion of the source circuit is done by using the SAT lit converted from the AIG lit
     // the target circuit need to have some offset to avoid conflict with the source circuit
@@ -91,6 +94,10 @@ public:
 
 protected:
 
+    // handle every new SAT lit that is added to the solver
+    // if abs(lit) > m_MaxVar update m_MaxVar
+    void HandleNewSATLit(SATLIT lit);
+
     // check if the sat lit is satisfied, must work at any solver
     virtual bool IsSATLitSatisfied(SATLIT lit) const
     {
@@ -125,7 +132,9 @@ protected:
     
     // *** Variables ***
 
-    unsigned m_TargetSATLitOffset = 0;
+    unsigned m_TargetSATLitOffset;
+
+    SATLIT m_MaxVar;
 
     // *** Stats ***
 

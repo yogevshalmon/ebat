@@ -25,6 +25,7 @@ void BoolMatchSolverIpasir::AddClause(vector<SATLIT>& cls)
 {
     for (SATLIT lit : cls)
     {
+        HandleNewSATLit(lit);
         ipasir_add(m_IpasirSolver, lit);
     }
 

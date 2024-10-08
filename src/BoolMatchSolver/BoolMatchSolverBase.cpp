@@ -6,8 +6,22 @@ using namespace std;
 BoolMatchSolverBase::BoolMatchSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
 // the desire encoding
 m_CirEncoding(enc),
-m_IsDual(isDual)
+m_IsDual(isDual),
+m_TargetSATLitOffset(0),
+m_MaxVar(1)
 {		
+}
+
+SATLIT BoolMatchSolverBase::GetNewVar()
+{
+    // update and return the next available SAT lit
+    return ++m_MaxVar;
+}
+
+void BoolMatchSolverBase::HandleNewSATLit(SATLIT lit)
+{
+    // update the max var
+    m_MaxVar = max(m_MaxVar, abs(lit));
 }
 
 const CirEncoding& BoolMatchSolverBase::GetEnc() const
