@@ -84,7 +84,7 @@ void CirSim::GenBotToTop()
     // now try to maximize the DC values
     for (const AIGLIT inputLit : m_Inputs)
     {
-        // in case already Dont care case, can come from AllSatEnumerDualRail
+        // in case already Dont care case, can come from different generalization technique
         if (GetValForLit(inputLit) == TVal::DontCare)
         {
             continue;
