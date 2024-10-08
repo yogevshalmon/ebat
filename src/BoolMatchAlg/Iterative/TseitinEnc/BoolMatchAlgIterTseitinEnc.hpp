@@ -3,7 +3,7 @@
 #include "BoolMatchAlg/Iterative/BoolMatchAlgIterBase.hpp"
 
 /*
-    allsat algorithm based on blocking with Tseitin encoding
+    boolean matching based on iteration algorithm with Tseitin encoding
 */
 class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
 {
