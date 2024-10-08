@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <vector>
+
 /*
     *** AIG lit/index ***
 */
@@ -128,3 +130,16 @@ inline static AIGINDEX DRToAIGIndex(const DRVAR& drvar, unsigned offset)
 {
     return AIGLitToAIGIndex(DRToAIGLit(drvar, offset));
 }
+
+
+/*
+    *** Matrix Index Match***
+*/
+
+using MatrixIndex = int;
+// Matrix index match is consist from two ints where 0 is not allowed 
+// if number is negative -> mean neg map where
+// (+,+)\(-,-) -> pos map, (+,-)\(-,+) -> neg map
+using MatrixIndexMatch = std::pair<MatrixIndex, MatrixIndex>;
+// Hold multiple matrix index matches
+using MatrixIndexVecMatch = std::vector<MatrixIndexMatch>;
