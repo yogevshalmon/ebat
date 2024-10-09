@@ -8,8 +8,8 @@ m_NegMapIsAllowed(allowNegMap),
 m_Solver(solver),
 m_InputSize(inputSize)
 {
-    m_DataMatchMatrix = new MatrixIndexVars[m_InputSize];
-    for (unsigned i = 0; i < m_InputSize; ++i)
+    m_DataMatchMatrix = new MatrixIndexVars[GerMatrixSize()];
+    for (unsigned i = 0; i < GerMatrixSize(); ++i)
     {
         m_DataMatchMatrix[i] = {m_Solver->GetNewVar(), m_Solver->GetNewVar()};
     }
