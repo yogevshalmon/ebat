@@ -52,7 +52,7 @@ public:
     }
 
     // return ipasir status
-    virtual SOLVER_RET_STATUS SolveUnderAssump(std::vector<SATLIT>& assmp)
+    virtual SOLVER_RET_STATUS SolveUnderAssump(const std::vector<SATLIT>& assmp)
     {
         throw std::runtime_error("Function not implemented");
     }

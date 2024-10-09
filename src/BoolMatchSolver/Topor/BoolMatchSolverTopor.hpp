@@ -24,7 +24,7 @@ class BoolMatchSolverTopor : public BoolMatchSolverBase
         virtual SOLVER_RET_STATUS Solve();
 
         // return ipasir status
-        virtual SOLVER_RET_STATUS SolveUnderAssump(std::vector<SATLIT>& assmp);
+        virtual SOLVER_RET_STATUS SolveUnderAssump(const std::vector<SATLIT>& assmp);
 
         // fix ploratiy of lit
         virtual void FixPolarity(SATLIT lit);
