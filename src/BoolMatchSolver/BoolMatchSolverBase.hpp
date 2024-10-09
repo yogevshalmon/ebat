@@ -85,6 +85,12 @@ public:
     // get the circuit encoding for the current solver
     const CirEncoding& GetEnc() const;
 
+        // check if the sat lit is satisfied, must work at any solver
+    virtual bool IsSATLitSatisfied(SATLIT lit) const
+    {
+        throw std::runtime_error("Function not implemented");
+    }
+
     // value from AIG index, used only on the circuit inputs
     TVal GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const;
 
@@ -104,12 +110,6 @@ protected:
     // handle every new SAT lit that is added to the solver
     // if abs(lit) > m_MaxVar update m_MaxVar
     void HandleNewSATLit(SATLIT lit);
-
-    // check if the sat lit is satisfied, must work at any solver
-    virtual bool IsSATLitSatisfied(SATLIT lit) const
-    {
-        throw std::runtime_error("Function not implemented");
-    }
 
     // check if assumption at pos is required
     virtual bool IsAssumptionRequired(size_t pos)

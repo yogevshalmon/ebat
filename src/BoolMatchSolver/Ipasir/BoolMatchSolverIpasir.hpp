@@ -25,11 +25,10 @@ class BoolMatchSolverIpasir : public BoolMatchSolverBase
         // return ipasir status
         virtual SOLVER_RET_STATUS SolveUnderAssump(std::vector<SATLIT>& assmp);
 
-
-    protected:
-
         // check if the sat lit is satisfied, must work at any solver
         virtual bool IsSATLitSatisfied(SATLIT lit) const;
+
+    protected:
 
         // check if assumption at pos is required
         virtual bool IsAssumptionRequired(size_t pos);
