@@ -17,7 +17,7 @@ m_TimeOut(inputParser.getUintCmdOption("/general/timeout", DEF_TIMEOUT)),
 m_IsInit(false),
 m_IsTimeOut(false), 
 m_TimeOnGeneralization(0),
-m_NumberOfMatches(0)
+m_NumberOfValidMatches(0)
 {
     m_Clk = clock();
 }
@@ -81,7 +81,7 @@ void BoolMatchAlgBase::PrintResult(bool wasInterrupted)
     {
         cout << "c *** Interrupted *** " << endl;
     }
-    cout << "c Number of matches: " << m_NumberOfMatches;
+    cout << "c Number of valid matches: " << m_NumberOfValidMatches;
     if (isInterrupted)
     {
         cout << "+";

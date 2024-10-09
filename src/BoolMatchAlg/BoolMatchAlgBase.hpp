@@ -61,7 +61,7 @@ class BoolMatchAlgBase
         
         // if the alg solver was init
         bool m_IsInit;
-        
+
         // parser for Aiger files 
         AigerParser m_AigParserSrc;
         AigerParser m_AigParserTrg;
@@ -81,5 +81,5 @@ class BoolMatchAlgBase
         // time spent on generalization
         double m_TimeOnGeneralization;
         // number of matches found
-        unsigned long long m_NumberOfMatches;
+        unsigned long long m_NumberOfValidMatches;
 };
