@@ -20,6 +20,9 @@ class BoolMatchSolverTopor : public BoolMatchSolverBase
         // add clause to solver
         void AddClause(std::vector<SATLIT>& cls);
 
+        // add clause to solver
+        void AddClause(const std::vector<SATLIT>& cls);
+
         // return ipasir status
         virtual SOLVER_RET_STATUS Solve();
 

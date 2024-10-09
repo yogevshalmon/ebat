@@ -40,6 +40,14 @@ void BoolMatchSolverTopor::AddClause(vector<SATLIT>& cls)
     m_ToporSolver->AddClause(cls);
 }
 
+void BoolMatchSolverTopor::AddClause(const vector<SATLIT>& cls)
+{
+    // copy the cls
+    vector<SATLIT> clsCopy(cls.begin(), cls.end());
+    // call the function without the const
+    AddClause(clsCopy);
+}
+
 SOLVER_RET_STATUS BoolMatchSolverTopor::Solve()
 {
     return GetToporResult(m_ToporSolver->Solve());

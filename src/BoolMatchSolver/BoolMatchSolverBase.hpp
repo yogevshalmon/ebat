@@ -21,8 +21,14 @@ public:
     {
     }
 
-    // Note: const not compiling because of intelSAT
+    
     virtual void AddClause(std::vector<SATLIT>& cls)
+    {
+        throw std::runtime_error("Function not implemented");
+    }
+
+    // Note: const not compiling in intelSAT
+    virtual void AddClause(const std::vector<SATLIT>& cls)
     {
         throw std::runtime_error("Function not implemented");
     }
@@ -36,6 +42,15 @@ public:
     { 
         std::vector<SATLIT> v(lits); return AddClause(v); 
     }
+
+    // assert that at most one lits is true
+    void AssertAtMostOne(const std::vector<SATLIT>& lits);
+
+    // assert that at least one lits is true
+    void AssertAtLeastOne(const std::vector<SATLIT>& lits);
+
+    // assert that exactly one lits is true
+    void AssertExactlyOne(const std::vector<SATLIT>& lits);
 
     // return the next available SAT lit
     SATLIT GetNewVar();

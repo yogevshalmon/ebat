@@ -12,6 +12,62 @@ m_MaxVar(1)
 {		
 }
 
+void BoolMatchSolverBase::AssertAtMostOne(const vector<SATLIT>& lits)
+{
+    switch (lits.size())
+	{
+	case 0:
+	case 1:
+		// The constraint is trivially true for lengths 0, 1
+		return;
+	case 2:
+        AddClause({NegateSATLit(lits[0]), NegateSATLit(lits[1])});
+		return;
+	case 3:
+		AddClause({NegateSATLit(lits[0]), NegateSATLit(lits[1])});
+        AddClause({NegateSATLit(lits[0]), NegateSATLit(lits[2])});
+        AddClause({NegateSATLit(lits[1]), NegateSATLit(lits[2])});
+        return;
+	case 4:
+		AddClause({NegateSATLit(lits[0]), NegateSATLit(lits[1])});
+        AddClause({NegateSATLit(lits[0]), NegateSATLit(lits[2])});
+        AddClause({NegateSATLit(lits[0]), NegateSATLit(lits[3])});
+        AddClause({NegateSATLit(lits[1]), NegateSATLit(lits[2])});
+        AddClause({NegateSATLit(lits[1]), NegateSATLit(lits[3])});
+        AddClause({NegateSATLit(lits[2]), NegateSATLit(lits[3])});
+        return;
+	default:
+		SATLIT newVar = GetNewVar();
+		size_t mid = lits.size() / 2;
+		vector<SATLIT> firstHalf, secondHalf;
+		for (size_t i = 0; i < mid; ++i)
+		{
+			firstHalf.push_back(lits[i]);
+		}
+		firstHalf.push_back(newVar);
+		for (size_t i = mid; i < lits.size(); ++i)
+		{
+			secondHalf.push_back(lits[i]);
+		}
+		secondHalf.push_back(-newVar);
+		AssertAtMostOne(firstHalf);
+		AssertAtMostOne(secondHalf);
+	}
+}
+
+void BoolMatchSolverBase::AssertAtLeastOne(const vector<SATLIT>& lits)
+{
+    AddClause(lits);
+}
+
+void BoolMatchSolverBase::AssertExactlyOne(const vector<SATLIT>& lits)
+{
+    // at least one
+    AssertAtLeastOne(lits);
+    // at most one
+    AssertAtMostOne(lits);
+}
+
 SATLIT BoolMatchSolverBase::GetNewVar()
 {
     // update and return the next available SAT lit
