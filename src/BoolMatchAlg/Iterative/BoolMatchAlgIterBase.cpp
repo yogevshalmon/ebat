@@ -62,9 +62,9 @@ void BoolMatchAlgIterBase::InitializeFromAIGs(const std::string& srcFileName, co
         m_TrgCirSimulation = new CirSim(m_AigParserTrg, m_UseTopToBotSim ? SimStrat::TopToBot : SimStrat::BotToTop);
     }
 
-    m_Solver->InitializeSolver(m_AigParserSrc, m_AigParserTrg);
+    m_Solver->InitializeSolverFromAIG(m_AigParserSrc, m_AigParserTrg);
 
-    if (m_UseDualSolver) m_DualSolver->InitializeSolver(m_AigParserSrc, m_AigParserTrg);
+    if (m_UseDualSolver) m_DualSolver->InitializeSolverFromAIG(m_AigParserSrc, m_AigParserTrg);
 
     MatrixIndexVecMatch initMatch = {};
     // TODO: edit the params here for the matrix
