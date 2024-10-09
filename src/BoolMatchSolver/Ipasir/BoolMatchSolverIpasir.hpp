@@ -19,11 +19,16 @@ class BoolMatchSolverIpasir : public BoolMatchSolverBase
         // add clause to solver
         void AddClause(std::vector<SATLIT>& cls);
 
+        // add clause to solver
+        void AddClause(const std::vector<SATLIT>& cls);
+
         // return ipasir status
         virtual SOLVER_RET_STATUS Solve();
 
         // return ipasir status
-        virtual SOLVER_RET_STATUS SolveUnderAssump(std::vector<SATLIT>& assmp);
+        SOLVER_RET_STATUS SolveUnderAssump(std::vector<SATLIT>& assmp);
+
+        SOLVER_RET_STATUS SolveUnderAssump(const std::vector<SATLIT>& assmp);
 
         // check if the sat lit is satisfied, must work at any solver
         virtual bool IsSATLitSatisfied(SATLIT lit) const;

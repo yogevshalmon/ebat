@@ -15,7 +15,7 @@ m_IpasirSolver(nullptr)
 {
     m_IpasirSolver = ipasir_init();
 
-    AddClause(CONST_LIT_TRUE);
+    AddClause({CONST_LIT_TRUE});
 }
 
 BoolMatchSolverIpasir::~BoolMatchSolverIpasir() 
@@ -34,12 +34,34 @@ void BoolMatchSolverIpasir::AddClause(vector<SATLIT>& cls)
     ipasir_add(m_IpasirSolver, 0);
 }
 
+void BoolMatchSolverIpasir::AddClause(const vector<SATLIT>& cls)
+{
+    for (SATLIT lit : cls)
+    {
+        HandleNewSATLit(lit);
+        ipasir_add(m_IpasirSolver, lit);
+    }
+
+    ipasir_add(m_IpasirSolver, 0);
+}
+
 SOLVER_RET_STATUS BoolMatchSolverIpasir::Solve()
 {
     return ipasir_solve(m_IpasirSolver);
 }
 
 SOLVER_RET_STATUS BoolMatchSolverIpasir::SolveUnderAssump(std::vector<SATLIT>& assmp)
+{
+    lastAssmp = assmp;
+    for (SATLIT lit : assmp)
+    {
+        ipasir_assume(m_IpasirSolver, lit);
+    }
+
+    return ipasir_solve(m_IpasirSolver);
+}
+
+SOLVER_RET_STATUS BoolMatchSolverIpasir::SolveUnderAssump(const std::vector<SATLIT>& assmp)
 {
     lastAssmp = assmp;
     for (SATLIT lit : assmp)

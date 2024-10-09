@@ -33,14 +33,15 @@ public:
         throw std::runtime_error("Function not implemented");
     }
 
-    void AddClause(SATLIT lit)
+    void AddClause(const SATLIT lit)
     {
         AddClause({lit});
     }
 
     void AddClause(std::initializer_list<SATLIT> lits) 
     { 
-        std::vector<SATLIT> v(lits); return AddClause(v); 
+        std::vector<SATLIT> v(lits);
+        return AddClause(v); 
     }
 
     // assert that at most one lits is true
