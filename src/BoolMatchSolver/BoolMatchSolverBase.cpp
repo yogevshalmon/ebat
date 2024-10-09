@@ -59,7 +59,7 @@ void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, con
             {
                 // each index represent the aig var meaning we need to *2
                 DRVAR dvar = AIGLitToDR((AIGLIT)(i * 2), 0);
-                AddClause({-GetPos(dvar),-GetNeg(dvar)});            
+                AddClause({NegateSATLit(GetPos(dvar)),NegateSATLit(GetNeg(dvar))});            
             }
         }
 
@@ -70,7 +70,7 @@ void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, con
             {
                 // each index represent the aig var meaning we need to *2
                 DRVAR dvar = AIGLitToDR((AIGLIT)(i * 2), m_TargetSATLitOffset);
-                AddClause({-GetPos(dvar),-GetNeg(dvar)});            
+                AddClause({NegateSATLit(GetPos(dvar)),NegateSATLit(GetNeg(dvar))});            
             }
         }
     }
@@ -312,15 +312,15 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
 
 void BoolMatchSolverBase::WriteAnd(SATLIT l, SATLIT r1, SATLIT r2)
 {
-    AddClause({l, -r1, -r2});
-    AddClause({-l, r1});
-    AddClause({-l, r2}); 
+    AddClause({l, NegateSATLit(r1), NegateSATLit(r2)});
+    AddClause({NegateSATLit(l), r1});
+    AddClause({NegateSATLit(l), r2}); 
 }
 
 
 void BoolMatchSolverBase::WriteOr(SATLIT l, SATLIT r1, SATLIT r2)
 {
-    WriteAnd(-l, -r1, -r2);
+    WriteAnd(NegateSATLit(l), NegateSATLit(r1), NegateSATLit(r2));
 }
 
 void BoolMatchSolverBase::HandleAndGate(const AigAndGate& gate, bool isSrcGate)
@@ -346,8 +346,8 @@ void BoolMatchSolverBase::HandleAndGate(const AigAndGate& gate, bool isSrcGate)
             DRVAR drR0 = AIGLitToDR(r0, offset);
             DRVAR drR1 = AIGLitToDR(r1, offset);
 
-            WriteAnd(GetPos(drL), GetPos(drR0), GetPos(drR1) );
-            WriteOr(GetNeg(drL), GetNeg(drR0), GetNeg(drR1) );
+            WriteAnd(GetPos(drL), GetPos(drR0), GetPos(drR1));
+            WriteOr(GetNeg(drL), GetNeg(drR0), GetNeg(drR1));
 
         break;
         }
