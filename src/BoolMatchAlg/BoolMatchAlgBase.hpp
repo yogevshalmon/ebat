@@ -59,6 +59,9 @@ class BoolMatchAlgBase
 		
         // *** Variables ***
         
+        // if the alg solver was init
+        bool m_IsInit;
+        
         // parser for Aiger files 
         AigerParser m_AigParserSrc;
         AigerParser m_AigParserTrg;

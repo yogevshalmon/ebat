@@ -14,6 +14,7 @@ m_PrintMatches(inputParser.getBoolCmdOption("/general/print_matches", true)),
 m_UseTimeOut(inputParser.cmdOptionExists("/general/timeout")),
 // check if timeout is given in command
 m_TimeOut(inputParser.getUintCmdOption("/general/timeout", DEF_TIMEOUT)),
+m_IsInit(false),
 m_IsTimeOut(false), 
 m_TimeOnGeneralization(0),
 m_NumberOfMatches(0)
