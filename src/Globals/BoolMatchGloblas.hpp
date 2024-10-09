@@ -149,3 +149,20 @@ using MatrixIndex = int;
 using MatrixIndexMatch = std::pair<MatrixIndex, MatrixIndex>;
 // Hold multiple matrix index matches
 using MatrixIndexVecMatch = std::vector<MatrixIndexMatch>;
+
+// return the index of the match in the matrix per the actual inital position
+inline static int PosToIndex(const size_t pos)
+{
+    return (int)(pos + 1);
+};
+
+inline static MatrixIndexMatch NegIndexMatch(const MatrixIndexMatch& match)
+{
+    return {match.first, -match.second};
+};
+
+static size_t GetAbsRealIndex(const int index)
+{
+    // index represent +1 and can be neg
+    return (size_t)(abs(index) - 1);
+};
