@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <vector>
 
@@ -161,8 +162,29 @@ inline static MatrixIndexMatch NegIndexMatch(const MatrixIndexMatch& match)
     return {match.first, -match.second};
 };
 
-static size_t GetAbsRealIndex(const int index)
+inline static size_t GetAbsRealIndex(const int index)
 {
     // index represent +1 and can be neg
     return (size_t)(abs(index) - 1);
+};
+
+// check if a match between two indexes is positive
+// (+,+)\(-,-) -> pos map, (+,-)\(-,+) -> neg map
+inline static bool IsMatchPos(const int x, const int y)
+{
+    // index can not be 0
+    assert(x != 0 && y != 0);
+    if(x > 0)
+    {
+        return y > 0 ? true : false;
+    }
+    else
+    {
+        return y > 0 ? false : true;
+    }
+};
+
+static bool IsMatchPos(const MatrixIndexMatch& match)
+{
+    return IsMatchPos(match.first, match.second);
 };
