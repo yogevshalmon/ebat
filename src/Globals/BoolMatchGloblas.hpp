@@ -50,6 +50,12 @@ typedef int32_t SATLIT;
 static constexpr SATLIT CONST_LIT_TRUE = 1;
 static constexpr SATLIT CONST_LIT_FALSE = -1;
 
+// negate SAT lit
+inline static SATLIT NegateSATLit(SATLIT lit)
+{
+    return -lit;
+}
+
 
 // return the sat lit for each AIG lit
 // defined as the correspond aig index + 1 

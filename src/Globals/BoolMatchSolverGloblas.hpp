@@ -25,3 +25,4 @@ typedef std::vector<std::pair<AIGLIT, TVal>> INPUT_ASSIGNMENT;
 static constexpr SOLVER_RET_STATUS SAT_RET_STATUS = 10;
 static constexpr SOLVER_RET_STATUS UNSAT_RET_STATUS = 20;
 static constexpr SOLVER_RET_STATUS TIMEOUT_RET_STATUS = 0;
+static constexpr SOLVER_RET_STATUS ERR_RET_STATUS = -1;
