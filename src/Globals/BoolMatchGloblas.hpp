@@ -33,6 +33,12 @@ inline static AIGLIT AIGIndexToAIGLit(AIGINDEX index)
     return (AIGLIT)(index << 1);
 };
 
+// TODO check this?
+inline static AIGLIT NegateAIGLit(AIGLIT lit)
+{
+    return lit ^ 1;
+};
+
 inline static bool IsAIGLitNeg(AIGLIT lit)
 {
     // lit is odd
