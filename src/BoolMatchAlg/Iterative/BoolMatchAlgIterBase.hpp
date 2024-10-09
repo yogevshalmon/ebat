@@ -2,6 +2,7 @@
 
 #include "BoolMatchAlg/BoolMatchAlgBase.hpp"
 #include "BoolMatchSolver/Solvers.hpp"
+#include "BoolMatchMatrix/BoolMatchMatrixBase.hpp"
 #include "CirSimulation/CirSim.hpp"
 
 /*
@@ -27,6 +28,10 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
 
         // print initial information, timeout etc..
         virtual void PrintInitialInformation();
+
+        // find all the boolean matches for the given AIGs
+        // after we assert that the output diff
+        virtual void FindAllMatchesUnderOutputAssert() = 0;
         
         INPUT_ASSIGNMENT GeneralizeWithCirSimulation(const INPUT_ASSIGNMENT& model, CirSim* cirSim);
 
@@ -59,6 +64,12 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
         BoolMatchSolverBase* m_Solver;
         // solver for the dual circuits mitter, used for ucore extraction
         BoolMatchSolverBase* m_DualSolver;
+
+        // the solver for the input match matrix
+        BoolMatchSolverBase* m_InputMatchSolver;
+        // the match matrix for the src-trg inputs
+        BoolMatchMatrixBase* m_InputMatchMatrix;
+
         // cir simulation component for the src and trg circuits
         CirSim* m_SrcCirSimulation;
         CirSim* m_TrgCirSimulation;

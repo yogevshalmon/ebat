@@ -1,5 +1,7 @@
 #include "BoolMatchAlg/Iterative/BoolMatchAlgIterBase.hpp"
 
+#include "BoolMatchMatrix/BoolMatchMatrixSingleVars/BoolMatchMatrixSingleVars.hpp"
+
 using namespace std;
 
 
@@ -18,32 +20,31 @@ m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/iter/lit_drop_conflict
 // default is false
 m_LitDropChekRecurCore(inputParser.getBoolCmdOption("/alg/iter/lit_drop_recur_ucore", false)),
 m_Solver(nullptr), 
-m_DualSolver(nullptr), 
+m_DualSolver(nullptr),
+m_InputMatchMatrix(nullptr),
 m_SrcCirSimulation(nullptr),
 m_TrgCirSimulation(nullptr)
 {
+    m_InputMatchSolver = new BoolMatchSolverTopor(inputParser, CirEncoding::TSEITIN_ENC, false);
 }
 
 BoolMatchAlgIterBase::~BoolMatchAlgIterBase() 
 {
     delete m_Solver;
     delete m_DualSolver;
+
+    delete m_InputMatchSolver;
+    delete m_InputMatchMatrix;
+
     delete m_SrcCirSimulation;
     delete m_TrgCirSimulation;
 }
 
+
 void BoolMatchAlgIterBase::InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName)
 {
     ParseAigFile(srcFileName, m_AigParserSrc);
-
     ParseAigFile(trgFileName, m_AigParserTrg);
-
-    // initilize tersim if needed
-    if (m_UseCirSim)
-    {
-        m_SrcCirSimulation = new CirSim(m_AigParserSrc, m_UseTopToBotSim ? SimStrat::TopToBot : SimStrat::BotToTop);
-        m_TrgCirSimulation = new CirSim(m_AigParserTrg, m_UseTopToBotSim ? SimStrat::TopToBot : SimStrat::BotToTop);
-    }
 
     m_SrcInputs = m_AigParserSrc.GetInputs();
     m_TrgInputs = m_AigParserTrg.GetInputs();
@@ -54,52 +55,32 @@ void BoolMatchAlgIterBase::InitializeFromAIGs(const std::string& srcFileName, co
         throw runtime_error("Src and Trg circuits have different number of inputs");
     }
 
+    // initilize cir simulation if needed
+    if (m_UseCirSim)
+    {
+        m_SrcCirSimulation = new CirSim(m_AigParserSrc, m_UseTopToBotSim ? SimStrat::TopToBot : SimStrat::BotToTop);
+        m_TrgCirSimulation = new CirSim(m_AigParserTrg, m_UseTopToBotSim ? SimStrat::TopToBot : SimStrat::BotToTop);
+    }
+
     m_Solver->InitializeSolver(m_AigParserSrc, m_AigParserTrg);
 
     if (m_UseDualSolver) m_DualSolver->InitializeSolver(m_AigParserSrc, m_AigParserTrg);
 
+    MatrixIndexVecMatch initMatch = {};
+    // TODO: edit the params here for the matrix
+    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_InputMatchSolver, m_InputSize, initMatch, false, false);
+
+    m_IsInit = true;
 }
+
 
 void BoolMatchAlgIterBase::FindAllMatches()
 {
+    assert(m_IsInit);
+
     PrintInitialInformation();
 
-    int res = m_Solver->Solve();
-
-    // while (res == SAT_RET_STATUS)
-    // {
-        INPUT_ASSIGNMENT initialAssignment = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
-        
-        clock_t beforeGen = clock();
-        INPUT_ASSIGNMENT minAssignment = GeneralizeModel(initialAssignment);
-        unsigned long genCpuTimeTaken =  clock() - beforeGen;
-        double genTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
-
-        m_TimeOnGeneralization += genTime;
-
-        // if timeout exit skip check for tautology
-        if (m_IsTimeOut)
-        {
-            //break;
-        }
-
-        unsigned currNumOfDC = GetNumOfDCFromInputAssignment(minAssignment); 
-
-        // no blocking clause, all inputs are DC -> tautology
-        if (currNumOfDC == m_InputSize)
-        {
-            cout << "c Tautology found" << endl;
-        }
-        else
-        {
-            if (m_PrintMatches)
-            {
-                PrintModel(minAssignment);
-            }
-        }
-
-        // res = m_Solver->Solve();      
-    // }
+    SOLVER_RET_STATUS res = m_Solver->Solve();
 
     if (res == TIMEOUT_RET_STATUS || m_IsTimeOut)
     {
@@ -108,13 +89,16 @@ void BoolMatchAlgIterBase::FindAllMatches()
         return;
     }
 
-    // not unsat at the end
-    if (res != UNSAT_RET_STATUS)
-    {
-        throw runtime_error("Last call wasnt UNSAT as expected");
-    }
-};
+    if (res != SAT_RET_STATUS)
+	{
+		throw runtime_error("Initial model is not satisfiable. Please verify the logic model of the cells are correct.");
+	}
 
+    // assert mitter on the circuit outputs
+    m_Solver->AssertOutputDiff(false);
+
+    FindAllMatchesUnderOutputAssert();
+};
 
 
 void BoolMatchAlgIterBase::PrintInitialInformation()
