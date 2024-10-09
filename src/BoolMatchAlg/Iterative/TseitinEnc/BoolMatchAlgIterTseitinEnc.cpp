@@ -44,8 +44,52 @@ void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
 
 void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 {
+    // get the assumption for the current input match
+	auto GetInputMatchAssump = [&](const MatrixIndexVecMatch& fmatch) -> vector<SATLIT>
+	{
+		vector<SATLIT> assump;
+		for (const MatrixIndexMatch& match : fmatch)
+		{
+			bool isMatchPos = IsMatchPos(match);
+
+            cout << "c curr assume match, is pos " << isMatchPos << " " << match.first << " -> " << match.second << endl; 
+
+            AIGLIT srcLit = m_SrcInputs[GetAbsRealIndex(match.first)];
+            AIGLIT trgLit = m_TrgInputs[GetAbsRealIndex(match.second)];
+
+			assump.push_back(m_Solver->GetInputEqAssmp(srcLit, trgLit, isMatchPos));
+		}
+
+		return assump;
+	};
+
+    auto CheckMatchUnderAssmp = [&](const vector<SATLIT>& assump) -> bool
+	{
+		SOLVER_RET_STATUS res = ERR_RET_STATUS;
+
+		res = m_Solver->SolveUnderAssump(assump);
+		
+		// now check the returned status
+		if (res == UNSAT_RET_STATUS)
+		{ // match found
+			return true;
+		}
+		else if (res == SAT_RET_STATUS)
+		{ // match isnt correct there is a counter example where the outputs doesnt match
+			return false;
+		}
+		else if (res == TIMEOUT_RET_STATUS)
+		{
+			m_IsTimeOut = true;
+			throw runtime_error("Timeout reached");
+		}
+		else
+		{ // in case of an error etc..
+			throw runtime_error("Solver return err status");
+		}
+	};
+
     unsigned numOfMatch = 0;
-	unsigned numOfValidMatchFound = 0;
 
     while (m_InputMatchMatrix->FindNextMatch() == SAT_RET_STATUS)
     {
@@ -55,8 +99,33 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         cout << "c Match found: " << numOfMatch << endl;
 
-        // INPUT_ASSIGNMENT initialAssignment = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
+        // get the assumption for the current input match
+        vector<SATLIT> assump = GetInputMatchAssump(currMatch);
         
+        if (CheckMatchUnderAssmp(assump))
+		{
+            m_NumberOfValidMatches++;
+
+            cout << "c Match is valid" << endl;
+            for (const MatrixIndexMatch& match : currMatch)
+            {
+                cout << "c " << match.first << " -> " << match.second << endl;
+            }
+
+            m_InputMatchMatrix->EliminateMatch(currMatch);
+        }
+        else
+        {
+            // print the counter example
+            cout << "c Match is invalid" << endl;
+            INPUT_ASSIGNMENT srcAssg = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
+            INPUT_ASSIGNMENT trgAssg = m_Solver->GetAssignmentForAIGLits(m_TrgInputs, false);
+            
+            PrintModel(srcAssg);
+            PrintModel(trgAssg);
+
+            m_InputMatchMatrix->EliminateMatch(currMatch);
+        }
         // clock_t beforeGen = clock();
         // INPUT_ASSIGNMENT minAssignment = GeneralizeModel(initialAssignment);
         // unsigned long genCpuTimeTaken =  clock() - beforeGen;
@@ -84,10 +153,6 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
         //         PrintModel(minAssignment);
         //     }
         // }
-
-        // res = m_Solver->Solve();
-
-        m_InputMatchMatrix->EliminateMatch(currMatch);
     }
 }
 
