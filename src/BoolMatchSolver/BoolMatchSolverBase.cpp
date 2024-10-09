@@ -6,6 +6,7 @@ using namespace std;
 BoolMatchSolverBase::BoolMatchSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
 // the desire encoding
 m_CirEncoding(enc),
+m_IsSolverInitFromAIG(false),
 m_IsDual(isDual),
 m_TargetSATLitOffset(0),
 m_MaxVar(1)
@@ -68,6 +69,20 @@ void BoolMatchSolverBase::AssertExactlyOne(const vector<SATLIT>& lits)
     AssertAtMostOne(lits);
 }
 
+SATLIT BoolMatchSolverBase::IsEqual(const SATLIT l1, const SATLIT l2)
+{
+    SATLIT newVar = GetNewVar();
+    AddClause({NegateSATLit(newVar), NegateSATLit(l1), l2});
+    AddClause({NegateSATLit(newVar), l1, NegateSATLit(l2)});
+    AddClause({newVar, l1, l2});
+    AddClause({newVar, NegateSATLit(l1), NegateSATLit(l2)});
+    return newVar;
+}
+
+SATLIT BoolMatchSolverBase::IsNotEqual(const SATLIT l1, const SATLIT l2)
+{
+    return NegateSATLit(IsEqual(l1, l2));
+}
 
 void BoolMatchSolverBase::AssertEqual(const SATLIT l1, const SATLIT l2)
 {
@@ -97,7 +112,7 @@ const CirEncoding& BoolMatchSolverBase::GetEnc() const
     return m_CirEncoding;
 }
 
-void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser)
+void BoolMatchSolverBase::InitializeSolverFromAIG(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser)
 {
     // update the offset for the target circuit
     // TODO add +1?
@@ -153,11 +168,46 @@ void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, con
 
     m_SrcOutputLit = srcOutputs[0];
     m_TrgOutputLit = trgOutputs[0];
+
+    m_IsSolverInitFromAIG = true;
 }
 
+SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, bool isEq)
+{
+    assert(m_IsSolverInitFromAIG);
+
+    SATLIT res = CONST_LIT_TRUE;
+
+    switch (m_CirEncoding)
+    {
+        case TSEITIN_ENC:
+        {
+            SATLIT srcLit = AIGLitToSATLit(srcAIGLit, 0);
+            SATLIT trgLit = AIGLitToSATLit(trgAIGLit, m_TargetSATLitOffset);
+
+            res = isEq ? IsEqual(srcLit, trgLit) : IsNotEqual(srcLit, trgLit);
+
+        break;
+        }
+        case DUALRAIL_ENC:
+        {
+            throw runtime_error("Currently GetInputEqAssmp not supported in DR encoding");
+        break;
+        }
+        default:
+        {
+            throw runtime_error("Unkown circuit encoding");
+
+        break;
+        }
+    }
+
+    return res;
+}
 
 TVal BoolMatchSolverBase::GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const
 {
+    assert(m_IsSolverInitFromAIG);
     TVal val = TVal::UnKown;
     unsigned offset = isLitFromSrc ? 0 : m_TargetSATLitOffset;
     switch (m_CirEncoding)
@@ -211,6 +261,8 @@ TVal BoolMatchSolverBase::GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) co
 // used for getting assigment from solver for the circuit inputs
 INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLIT>& aigLits, bool isLitFromSrc) const
 {
+    assert(m_IsSolverInitFromAIG);
+
     INPUT_ASSIGNMENT assignment(aigLits.size());
 
     transform(aigLits.begin(), aigLits.end(), assignment.begin(), [&](AIGLIT aigLit) -> pair<AIGLIT, TVal>
@@ -380,20 +432,21 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
 
 void BoolMatchSolverBase::AssertOutputDiff(bool isNegMatch)
 {
+    assert(m_IsSolverInitFromAIG);
     // save the output of the circuits
     switch (m_CirEncoding)
     {
         case TSEITIN_ENC:
         {
             SATLIT srcOutVar = AIGLitToSATLit(m_SrcOutputLit, 0);
-            SATLIT trgOutVar = AIGLitToSATLit(NegateSATLit ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
+            SATLIT trgOutVar = AIGLitToSATLit(isNegMatch ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
             AssertNotEqual(srcOutVar, trgOutVar);
         break;
         }
         case DUALRAIL_ENC:
         {
             DRVAR srcOutDRVar = AIGLitToDR(m_SrcOutputLit, 0);
-            DRVAR trgOutDRVar = AIGLitToDR(NegateSATLit ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
+            DRVAR trgOutDRVar = AIGLitToDR(isNegMatch ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
             
             // if the output differ then it can either be 1,0 or 0,1
             SATLIT OutTrueFalse = GetNewVar();
@@ -427,6 +480,8 @@ void BoolMatchSolverBase::WriteOr(SATLIT l, SATLIT r1, SATLIT r2)
 
 void BoolMatchSolverBase::HandleAndGate(const AigAndGate& gate, bool isSrcGate)
 {
+    assert(m_IsSolverInitFromAIG);
+
     AIGLIT l = gate.GetL();
     AIGLIT r0 = gate.GetR0();
     AIGLIT r1 = gate.GetR1();

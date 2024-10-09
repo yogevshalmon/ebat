@@ -53,6 +53,12 @@ public:
     // assert that exactly one lits is true
     void AssertExactlyOne(const std::vector<SATLIT>& lits);
 
+    // create constraints where the return lit specify if the two lits are equal
+    SATLIT IsEqual(const SATLIT l1, const SATLIT l2);
+
+    // create constraints where the return lit specify if the two lits are not equal
+    SATLIT IsNotEqual(const SATLIT l1, const SATLIT l2);
+
     // assert that the two lits are equal
     void AssertEqual(const SATLIT l1, const SATLIT l2);
 
@@ -65,7 +71,7 @@ public:
     // initialize solver from the aigs of the src and trg
     // the conversion of the source circuit is done by using the SAT lit converted from the AIG lit
     // the target circuit need to have some offset to avoid conflict with the source circuit
-    void InitializeSolver(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser);
+    void InitializeSolverFromAIG(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser);
 
     // return ipasir status
     virtual SOLVER_RET_STATUS Solve()
@@ -111,6 +117,8 @@ public:
     {
         throw std::runtime_error("Function not implemented");
     }
+
+    SATLIT GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, bool isEq);
 
     // value from AIG index, used only on the circuit inputs
     TVal GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const;
@@ -164,6 +172,9 @@ protected:
     const bool m_IsDual;
     
     // *** Variables ***
+    
+    // TODO add checks for func that this is init
+    bool m_IsSolverInitFromAIG;
 
     unsigned m_TargetSATLitOffset;
 
