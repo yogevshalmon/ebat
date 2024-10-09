@@ -45,9 +45,17 @@ SOLVER_RET_STATUS BoolMatchSolverTopor::Solve()
     return GetToporResult(m_ToporSolver->Solve());
 }
 
-SOLVER_RET_STATUS BoolMatchSolverTopor::SolveUnderAssump(const std::vector<SATLIT>& assmp)
+SOLVER_RET_STATUS BoolMatchSolverTopor::SolveUnderAssump(std::vector<SATLIT>& assmp)
 {
     return GetToporResult(m_ToporSolver->Solve(assmp));
+}
+
+SOLVER_RET_STATUS BoolMatchSolverTopor::SolveUnderAssump(const std::vector<SATLIT>& assmp)
+{
+    // copy the assump
+    vector<SATLIT> assmpCopy(assmp.begin(), assmp.end());
+    // call the function without the const
+    return SolveUnderAssump(assmpCopy);
 }
 
 void BoolMatchSolverTopor::FixPolarity(SATLIT lit)
