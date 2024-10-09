@@ -9,7 +9,7 @@ m_CirEncoding(enc),
 m_IsDual(isDual),
 m_TargetSATLitOffset(0),
 m_MaxVar(1)
-{		
+{
 }
 
 void BoolMatchSolverBase::AssertAtMostOne(const vector<SATLIT>& lits)
@@ -68,6 +68,18 @@ void BoolMatchSolverBase::AssertExactlyOne(const vector<SATLIT>& lits)
     AssertAtMostOne(lits);
 }
 
+
+void BoolMatchSolverBase::AssertEqual(const SATLIT l1, const SATLIT l2)
+{
+    AddClause({NegateSATLit(l1), l2});
+    AddClause({l1, NegateSATLit(l2)});
+}
+
+void BoolMatchSolverBase::AssertNotEqual(const SATLIT l1, const SATLIT l2)
+{
+    AssertEqual(l1, NegateSATLit(l2));
+}
+
 SATLIT BoolMatchSolverBase::GetNewVar()
 {
     // update and return the next available SAT lit
@@ -92,8 +104,6 @@ void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, con
     m_TargetSATLitOffset = (unsigned)srcAigeParser.GetMaxIndex();
     // check that the offset is valid
     assert(m_TargetSATLitOffset > 0);
-
-    AddClause(CONST_LIT_TRUE);
 
     for (const AigAndGate& gate : srcAigeParser.GetAndGated())
     {
@@ -141,6 +151,8 @@ void BoolMatchSolverBase::InitializeSolver(const AigerParser& srcAigeParser, con
         throw runtime_error("Error, number of outputs should be 1 for both circuits"); 
     }
 
+    m_SrcOutputLit = srcOutputs[0];
+    m_TrgOutputLit = trgOutputs[0];
 }
 
 
@@ -366,13 +378,47 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
 }*/
 
 
+void BoolMatchSolverBase::AssertOutputDiff(bool isNegMatch)
+{
+    // save the output of the circuits
+    switch (m_CirEncoding)
+    {
+        case TSEITIN_ENC:
+        {
+            SATLIT srcOutVar = AIGLitToSATLit(m_SrcOutputLit, 0);
+            SATLIT trgOutVar = AIGLitToSATLit(NegateSATLit ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
+            AssertNotEqual(srcOutVar, trgOutVar);
+        break;
+        }
+        case DUALRAIL_ENC:
+        {
+            DRVAR srcOutDRVar = AIGLitToDR(m_SrcOutputLit, 0);
+            DRVAR trgOutDRVar = AIGLitToDR(NegateSATLit ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
+            
+            // if the output differ then it can either be 1,0 or 0,1
+            SATLIT OutTrueFalse = GetNewVar();
+            WriteAnd(OutTrueFalse, GetPos(srcOutDRVar), GetNeg(trgOutDRVar));
+            SATLIT OutFalseTrue = GetNewVar();
+            WriteAnd(OutFalseTrue, GetNeg(srcOutDRVar), GetPos(trgOutDRVar));
+            // assert that at least one of the cases is true
+            AddClause({OutTrueFalse, OutFalseTrue});
+        break;
+        }
+        default:
+        {
+            throw runtime_error("Unkown circuit encoding");
+
+        break;
+        }
+    }
+}
+
 void BoolMatchSolverBase::WriteAnd(SATLIT l, SATLIT r1, SATLIT r2)
 {
     AddClause({l, NegateSATLit(r1), NegateSATLit(r2)});
     AddClause({NegateSATLit(l), r1});
     AddClause({NegateSATLit(l), r2}); 
 }
-
 
 void BoolMatchSolverBase::WriteOr(SATLIT l, SATLIT r1, SATLIT r2)
 {

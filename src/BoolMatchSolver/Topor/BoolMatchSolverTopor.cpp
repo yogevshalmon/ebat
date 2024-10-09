@@ -24,6 +24,8 @@ m_ToporSolver(nullptr)
     {
         m_ToporSolver->SetParam("/timeout/global",(double)m_TimeOut);
     }
+
+    AddClause(CONST_LIT_TRUE);
 }
 
 BoolMatchSolverTopor::~BoolMatchSolverTopor() 

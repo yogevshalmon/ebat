@@ -52,6 +52,12 @@ public:
     // assert that exactly one lits is true
     void AssertExactlyOne(const std::vector<SATLIT>& lits);
 
+    // assert that the two lits are equal
+    void AssertEqual(const SATLIT l1, const SATLIT l2);
+
+    // assert that the two lits are not equal
+    void AssertNotEqual(const SATLIT l1, const SATLIT l2);
+
     // return the next available SAT lit
     SATLIT GetNewVar();
 
@@ -71,7 +77,6 @@ public:
     {
         throw std::runtime_error("Function not implemented");
     }
-
 
     // return ipasir status
     virtual SOLVER_RET_STATUS SolveUnderAssump(const std::vector<SATLIT>& assmp)
@@ -120,6 +125,11 @@ public:
     // useRecurUnCore - if to use unsat core extraction recursivly with each drop lit check
     //INPUT_ASSIGNMENT GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop = false, int dropt_lit_conflict_limit = -1, bool useRecurUnCore = false);
 
+    // assert that the outputs differ
+    // this is usfull since if we want to check if to outputs are equal, we check that they can not be different
+    // NOTE: currently we assume only 1 output
+    void AssertOutputDiff(bool isNegMatch);
+
 protected:
 
     // handle every new SAT lit that is added to the solver
@@ -157,6 +167,10 @@ protected:
     unsigned m_TargetSATLitOffset;
 
     SATLIT m_MaxVar;
+
+    // save the outputs of the circuits
+    AIGLIT m_SrcOutputLit;
+    AIGLIT m_TrgOutputLit;
 
     // *** Stats ***
 

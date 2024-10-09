@@ -14,6 +14,8 @@ m_TimeOut(inputParser.getUintCmdOption("/general/timeout", DEF_TIMEOUT)),
 m_IpasirSolver(nullptr)
 {
     m_IpasirSolver = ipasir_init();
+
+    AddClause(CONST_LIT_TRUE);
 }
 
 BoolMatchSolverIpasir::~BoolMatchSolverIpasir() 
