@@ -27,7 +27,7 @@ m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_dual", 
         {
             m_DualSolver = new BoolMatchSolverTopor(inputParser, CirEncoding::TSEITIN_ENC, true);
         }  
-    } 
+    }
 }
 
 BoolMatchAlgIterTseitinEnc::~BoolMatchAlgIterTseitinEnc()
@@ -40,6 +40,55 @@ void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
     BoolMatchAlgIterBase::PrintInitialInformation();
 
     cout << "c Use Tseitin encoding" << endl;   
+}
+
+void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
+{
+    unsigned numOfMatch = 0;
+	unsigned numOfValidMatchFound = 0;
+
+    while (m_InputMatchMatrix->FindNextMatch() == SAT_RET_STATUS)
+    {
+        numOfMatch++;
+
+        MatrixIndexVecMatch currMatch = m_InputMatchMatrix->GetCurrMatch();
+
+        cout << "c Match found: " << numOfMatch << endl;
+
+        // INPUT_ASSIGNMENT initialAssignment = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
+        
+        // clock_t beforeGen = clock();
+        // INPUT_ASSIGNMENT minAssignment = GeneralizeModel(initialAssignment);
+        // unsigned long genCpuTimeTaken =  clock() - beforeGen;
+        // double genTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+
+        // m_TimeOnGeneralization += genTime;
+
+        // // if timeout exit skip check for tautology
+        // if (m_IsTimeOut)
+        // {
+        //     //break;
+        // }
+
+        // unsigned currNumOfDC = GetNumOfDCFromInputAssignment(minAssignment); 
+
+        // // no blocking clause, all inputs are DC -> tautology
+        // if (currNumOfDC == m_InputSize)
+        // {
+        //     cout << "c Tautology found" << endl;
+        // }
+        // else
+        // {
+        //     if (m_PrintMatches)
+        //     {
+        //         PrintModel(minAssignment);
+        //     }
+        // }
+
+        // res = m_Solver->Solve();
+
+        m_InputMatchMatrix->EliminateMatch(currMatch);
+    }
 }
 
 INPUT_ASSIGNMENT BoolMatchAlgIterTseitinEnc::GeneralizeModel(const INPUT_ASSIGNMENT& model)

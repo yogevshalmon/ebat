@@ -17,6 +17,8 @@ class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
 
         // print initial information, timeout etc..
         virtual void PrintInitialInformation();
+
+        virtual void FindAllMatchesUnderOutputAssert();
         
         INPUT_ASSIGNMENT GeneralizeModel(const INPUT_ASSIGNMENT& model) override;
     
