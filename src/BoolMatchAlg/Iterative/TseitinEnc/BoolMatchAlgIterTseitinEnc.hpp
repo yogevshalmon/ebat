@@ -20,7 +20,7 @@ class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
 
         virtual void FindAllMatchesUnderOutputAssert();
         
-        INPUT_ASSIGNMENT GeneralizeModel(const INPUT_ASSIGNMENT& model) override;
+        INPUT_ASSIGNMENT GeneralizeModel(const INPUT_ASSIGNMENT& model);
     
         // *** Params ***
 
