@@ -2,8 +2,9 @@
 
 using namespace std;
 
-BoolMatchMatrixSingleVars::BoolMatchMatrixSingleVars(BoolMatchSolverBase* solver, unsigned inputSize, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector, bool allowNegMap):
-BoolMatchMatrixBase(solver, inputSize, indexMapping, useMatchSelector, allowNegMap)
+BoolMatchMatrixSingleVars::BoolMatchMatrixSingleVars(BoolMatchSolverBase* solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+	bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector):
+BoolMatchMatrixBase(solver, inputSize, blockMatchTypeWithInputsVal, allowNegMap, indexMapping, useMatchSelector)
 {
     // assert the row and col
     AssertRowAndCol(indexMapping);

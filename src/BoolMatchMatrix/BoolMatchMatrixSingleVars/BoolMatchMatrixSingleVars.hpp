@@ -9,7 +9,8 @@ class BoolMatchMatrixSingleVars : virtual public BoolMatchMatrixBase
 public:
     // initialize the class
     // call the base class constructor
-    BoolMatchMatrixSingleVars(BoolMatchSolverBase* m_Solver, unsigned inputSize, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector, bool allowNegMap);
+    BoolMatchMatrixSingleVars(BoolMatchSolverBase* m_Solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+        bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector);
 
     // get the current match 
     MatrixIndexVecMatch GetCurrMatch() const;
