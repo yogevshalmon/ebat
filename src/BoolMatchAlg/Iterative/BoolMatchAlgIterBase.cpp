@@ -41,20 +41,8 @@ BoolMatchAlgIterBase::~BoolMatchAlgIterBase()
 }
 
 
-void BoolMatchAlgIterBase::InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName)
+void BoolMatchAlgIterBase::_InitializeFromAIGs()
 {
-    ParseAigFile(srcFileName, m_AigParserSrc);
-    ParseAigFile(trgFileName, m_AigParserTrg);
-
-    m_SrcInputs = m_AigParserSrc.GetInputs();
-    m_TrgInputs = m_AigParserTrg.GetInputs();
-
-    m_InputSize = m_SrcInputs.size();
-    if (m_InputSize != m_TrgInputs.size())
-    {
-        throw runtime_error("Src and Trg circuits have different number of inputs");
-    }
-
     // initilize cir simulation if needed
     if (m_UseCirSim)
     {
@@ -69,8 +57,6 @@ void BoolMatchAlgIterBase::InitializeFromAIGs(const std::string& srcFileName, co
     MatrixIndexVecMatch initMatch = {};
     // TODO: edit the params here for the matrix
     m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_InputMatchSolver, m_InputSize, initMatch, false, false);
-
-    m_IsInit = true;
 }
 
 

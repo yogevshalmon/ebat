@@ -17,8 +17,6 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
 
         virtual ~BoolMatchAlgIterBase();
 
-        virtual void InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName);
-
         // find all the boolean matches for the given AIGs
         virtual void FindAllMatches();
 
@@ -29,18 +27,14 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
         // print initial information, timeout etc..
         virtual void PrintInitialInformation();
 
+        virtual void _InitializeFromAIGs();
+
         // find all the boolean matches for the given AIGs
         // after we assert that the output diff
         virtual void FindAllMatchesUnderOutputAssert() = 0;
         
         INPUT_ASSIGNMENT GeneralizeWithCirSimulation(const INPUT_ASSIGNMENT& model, CirSim* cirSim);
-
-        virtual INPUT_ASSIGNMENT GeneralizeModel(const INPUT_ASSIGNMENT& model)
-        { 
-            throw std::runtime_error("Function not implemented"); 
-        };
         
-
         // *** Params ***
 
         // if to use simulation
