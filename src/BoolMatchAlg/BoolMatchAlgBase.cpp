@@ -69,7 +69,28 @@ void BoolMatchAlgBase::ParseAigFile(const string& filename, AigerParser& aigPars
     {
         throw runtime_error("Error parsing the file");
     }
+}
 
+void BoolMatchAlgBase::InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName)
+{
+    ParseAigFile(srcFileName, m_AigParserSrc);
+    ParseAigFile(trgFileName, m_AigParserTrg);
+
+    m_SrcInputs = m_AigParserSrc.GetInputs();
+    m_TrgInputs = m_AigParserTrg.GetInputs();
+
+    m_InputSize = m_SrcInputs.size();
+    if (m_InputSize != m_TrgInputs.size())
+    {
+        throw runtime_error("Src and Trg circuits have different number of inputs");
+    }
+
+    // TODO add AIG to index map
+
+    // call the derived class to initilize the data
+    _InitializeFromAIGs();
+
+    m_IsInit = true;
 }
 
 void BoolMatchAlgBase::PrintResult(bool wasInterrupted)

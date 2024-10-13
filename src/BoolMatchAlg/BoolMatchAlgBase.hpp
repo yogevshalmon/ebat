@@ -21,7 +21,8 @@ class BoolMatchAlgBase
         virtual ~BoolMatchAlgBase();
 
         // intilize with aiger files for both the src and trg
-        virtual void InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName) = 0;
+        // call protected function _InitializeFromAIGs which will be implemented in the derived classes
+        void InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName);
 
         // find all the boolean matches for the given AIGs 
         virtual void FindAllMatches() = 0;
@@ -36,6 +37,9 @@ class BoolMatchAlgBase
         // parse aag or aig files
         // initilize either the m_AigParserSrc and m_AigParserTrg
         void ParseAigFile(const std::string& filename, AigerParser& aigParser);
+
+        // handle the initialization after we parse the AIG and init the src and trg inputs
+        virtual void _InitializeFromAIGs() = 0;
 
         // print single model for the inputs
         void PrintModel(const INPUT_ASSIGNMENT& model);
