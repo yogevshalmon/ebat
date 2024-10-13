@@ -58,7 +58,7 @@ void BoolMatchMatrixBase::AssertNoMatch()
 }
 
 void BoolMatchMatrixBase::BlockMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
-    BoolMatchMatrixBase* otherMatchData = nullptr)
+    BoolMatchMatrixBase* otherMatchData)
 {
 	if (!m_NegMapIsAllowed)
 	{
@@ -83,7 +83,7 @@ void BoolMatchMatrixBase::BlockMatchesByInputsVal(const INDX_ASSIGNMENT& srcValu
 }
 
 void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
-    BoolMatchMatrixBase* otherMatchData = nullptr)
+    BoolMatchMatrixBase* otherMatchData)
 {	
 	// check for the same size of inputs
 	assert(srcValues.size() == trgValues.size());
@@ -241,6 +241,18 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGN
 			otherMatchData->EliminateMatches(uniqueCombinations);
 		}
 	}
+}
+
+void BoolMatchMatrixBase::EliminateMatchesByInputsValForNeg(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    BoolMatchMatrixBase* otherMatchData)
+{
+}
+
+// Enforce matches according to the current values of src and trg
+// where we assume negated map is allowed
+void BoolMatchMatrixBase::EnforceMatchesByInputsValForNeg(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+	BoolMatchMatrixBase* otherMatchData)
+{
 }
 
 void BoolMatchMatrixBase::ResetEliminatedMatches()
