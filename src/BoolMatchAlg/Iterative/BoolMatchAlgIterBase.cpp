@@ -56,7 +56,7 @@ void BoolMatchAlgIterBase::_InitializeFromAIGs()
 
     MatrixIndexVecMatch initMatch = {};
     // TODO: edit the params here for the matrix
-    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_InputMatchSolver, m_InputSize, initMatch, false, false);
+    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_InputMatchSolver, m_InputSize, BoolMatchBlockType::DYNAMIC_BLOCK, false, initMatch, false);
 }
 
 
