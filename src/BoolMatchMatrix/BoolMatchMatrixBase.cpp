@@ -1,8 +1,12 @@
 #include "BoolMatchMatrix/BoolMatchMatrixBase.hpp"
 
+#include <array>
+
 using namespace std;
 
-BoolMatchMatrixBase::BoolMatchMatrixBase(BoolMatchSolverBase* solver, unsigned inputSize, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector, bool allowNegMap):
+BoolMatchMatrixBase::BoolMatchMatrixBase(BoolMatchSolverBase* solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+	bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector):
+m_BlockMatchTypeWithInputsVal(blockMatchTypeWithInputsVal),
 m_UseMatchSelector(useMatchSelector),
 m_NegMapIsAllowed(allowNegMap),
 m_Solver(solver),
@@ -18,7 +22,6 @@ m_InputSize(inputSize)
     {
         m_MatchSelector = m_Solver->GetNewVar();
     }
-
 }
 
 BoolMatchMatrixBase::~BoolMatchMatrixBase()
@@ -54,6 +57,192 @@ void BoolMatchMatrixBase::AssertNoMatch()
 	}
 }
 
+void BoolMatchMatrixBase::BlockMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    BoolMatchMatrixBase* otherMatchData = nullptr)
+{
+	if (!m_NegMapIsAllowed)
+	{
+		EliminateOrEnforceMatchesByInputsVal(srcValues, trgValues, otherMatchData);
+	}
+	else
+	{
+		
+		// currently dynamic block scheme for negated map is just using the enforce match
+		bool useEnforce = m_BlockMatchTypeWithInputsVal == BoolMatchBlockType::ENFORCE_MATCH || m_BlockMatchTypeWithInputsVal == BoolMatchBlockType::DYNAMIC_BLOCK;
+
+		if (useEnforce)
+		{
+			EnforceMatchesByInputsValForNeg(srcValues, trgValues, otherMatchData);
+		}
+		else
+		{
+			// NOTE: the usage of EliminateMatchesByInputsValForNeg is restrected to some Generalization techniques
+			EliminateMatchesByInputsValForNeg(srcValues, trgValues, otherMatchData);
+		}
+	}
+}
+
+void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    BoolMatchMatrixBase* otherMatchData = nullptr)
+{	
+	// check for the same size of inputs
+	assert(srcValues.size() == trgValues.size());
+	// remove this assertion? - only if we ensure that the DC are removed from the same value
+	// we can instead just flip values will give the same effect
+	assert(srcValues.size() == m_InputSize);
+	assert(!m_NegMapIsAllowed);
+	if (otherMatchData != nullptr)
+	{
+		assert(otherMatchData->m_InputSize == m_InputSize);
+		assert(otherMatchData->m_NegMapIsAllowed == m_NegMapIsAllowed);
+	}
+
+	size_t maxVal = 1;
+
+	// this array contain the indexes of each value 0 or 1
+	// each array[i] represent all the indexes where value = i
+	array<vector<unsigned>, 2> srcIndexPerValue = {vector<unsigned>(), vector<unsigned>()};
+	array<vector<unsigned>, 2> trgIndexPerValue = {vector<unsigned>(), vector<unsigned>()};
+
+	auto fillIndexes = [&](const INDX_ASSIGNMENT& values, array<vector<unsigned>,2>& indexPerValue) -> void
+	{
+		for (size_t i = 0; i < values.size(); i++)
+		{
+			unsigned index = values[i].first;
+			TVal val = values[i].second;
+			if (val == TVal::True)
+			{
+				indexPerValue[1].push_back(index);
+			}
+			else if (val == TVal::False)
+			{
+				indexPerValue[0].push_back(index);
+			}
+			// if DC do nothing
+		}
+	};
+
+	fillIndexes(srcValues, srcIndexPerValue);
+	fillIndexes(trgValues, trgIndexPerValue);
+
+	// check for the value with the max indexes
+	// we can do this because of symmetry rules
+	unsigned valWithMaxIndexes = 0;
+	size_t sizeOfMaxIndexes = 0;
+
+	for (size_t val = 0; val <= maxVal; val++)
+	{
+		// we check that the size of the indexes are the same
+		assert(srcIndexPerValue[val].size() == trgIndexPerValue[val].size());
+		// compare with >= instead of >
+		// as we start from val 0 switching to same size of higher index is desired
+		if (srcIndexPerValue[val].size() >= sizeOfMaxIndexes)
+		{
+			valWithMaxIndexes = val;
+			sizeOfMaxIndexes = srcIndexPerValue[val].size();
+		}
+	}
+
+	// calculate which val is the max index set
+	// so we will check for each comb with this val
+	m_LastMaxVal = valWithMaxIndexes;
+
+	// m_DataSize is the number of inputs
+	// if one val have all the values and still output are not the same there is not match beetwen the two circuts
+	// assert(false) and return
+	if (sizeOfMaxIndexes == m_InputSize)
+	{
+		AssertNoMatch();
+		if (otherMatchData != nullptr)
+		{
+			otherMatchData->AssertNoMatch();
+		}
+		return;
+	}
+
+	bool useEnforce = m_BlockMatchTypeWithInputsVal == BoolMatchBlockType::ENFORCE_MATCH;
+
+	// in dynamic block we will choose the ELIMINATE_MATCH method if the number of actuall indexes is less then some small const
+	// this is because that in elimnate the number of clauses is around n! where n is size_of_inputs - size_of_max_index
+	// so the max group size we need to block
+	// in enforce match the size of the block is around n^2 (actually n*(size_of_inputs - size_of_max_index))
+	if (m_BlockMatchTypeWithInputsVal == BoolMatchBlockType::DYNAMIC_BLOCK)
+	{
+		if ((size_t)m_InputSize - sizeOfMaxIndexes <= DYNAMIC_BLOCK_MIN_GROUP_SIZE)
+		{
+			useEnforce = false;
+		}
+		else
+		{
+			useEnforce = true;
+		}
+	}
+
+	if (useEnforce)
+	{
+		MatrixIndexVecMatch forcedMatchIndVec;
+		// iterate over all the possible values and enforce some match to other value
+		// skip the val with max indexes
+		for (size_t srcCurrVal = 0; srcCurrVal <= maxVal; srcCurrVal++)
+		{
+			// skip val with max indexes
+			if (srcCurrVal == valWithMaxIndexes)
+			{
+				continue;
+			}
+			
+			for (unsigned srcIndexAtCurrVal : srcIndexPerValue[srcCurrVal])
+			{
+				for (size_t trgVal = 0; trgVal <= maxVal; trgVal++)
+				{
+					// skip indexes with the same values as src
+					if (trgVal == srcCurrVal)
+					{
+						continue;
+					}
+
+					for (unsigned trgindexAtVal : trgIndexPerValue[trgVal])
+					{
+						forcedMatchIndVec.push_back(make_pair((int)srcIndexAtCurrVal, (int)trgindexAtVal));
+					}
+				}
+			}
+		}
+
+		EnforceMatch(forcedMatchIndVec);
+
+		// if other matchData call enforce from that aswell
+		if (otherMatchData != nullptr)
+		{
+			otherMatchData->EnforceMatch(forcedMatchIndVec);
+		}
+	}
+	else
+	{
+		vector<MatrixIndexVecMatch> uniqueCombinations;
+
+		for (size_t val = 0; val <= maxVal; val++)
+		{
+			// skip val with max indexes
+			if (val == valWithMaxIndexes)
+			{
+				continue;
+			}
+			vector<MatrixIndexVecMatch> combAtDepth = AllComb(srcIndexPerValue[val], trgIndexPerValue[val]);
+
+			uniqueCombinations = CombineAllComb(uniqueCombinations, combAtDepth);
+		}
+
+		EliminateMatches(uniqueCombinations);
+
+		// if other matchData send eliminate from that aswell
+		if (otherMatchData != nullptr)
+		{
+			otherMatchData->EliminateMatches(uniqueCombinations);
+		}
+	}
+}
+
 void BoolMatchMatrixBase::ResetEliminatedMatches()
 {
     assert(m_UseMatchSelector);
@@ -77,3 +266,63 @@ size_t BoolMatchMatrixBase::GetAbsMatrixPosFromIndexes(int x, int y) const
 {
 	return (GetAbsRealIndex(x) * GetMatrixColRowSize()) + GetAbsRealIndex(y);
 }
+
+// *** Additonal help functions for the main BlockMatch functions ***
+
+vector<MatrixIndexVecMatch> BoolMatchMatrixBase::AllComb(vector<unsigned>& vec1, vector<unsigned>& vec2)
+{
+	vector<MatrixIndexVecMatch> uniqueCombinations;
+
+	if (vec1.empty() && vec2.empty())
+	{
+		return uniqueCombinations;
+	}
+
+	do
+	{
+		MatrixIndexVecMatch combination;
+		combination.reserve(vec1.size());
+		transform(vec1.begin(), vec1.end(), vec2.begin(), back_inserter(combination),
+			[](unsigned l, unsigned r) { return make_pair(l, r); });
+
+		uniqueCombinations.push_back(combination);
+
+	} while (next_permutation(vec2.begin(), vec2.end()));
+
+	return uniqueCombinations;
+};
+
+vector<MatrixIndexVecMatch> BoolMatchMatrixBase::CombineAllComb(vector<MatrixIndexVecMatch>& vec1, vector<MatrixIndexVecMatch>& vec2)
+{
+	if (vec1.empty() && !vec2.empty())
+	{
+		return vec2;
+	}
+
+	if (!vec1.empty() && vec2.empty())
+	{
+		return vec1;
+	}
+
+	vector<MatrixIndexVecMatch> uniqueCombinations;
+
+	if (vec1.empty() && vec2.empty())
+	{
+		return uniqueCombinations;
+	}
+
+	// at this point we know both of them not empty
+	// so the for loop will work
+
+	for (MatrixIndexVecMatch match1 : vec1)
+	{
+		for (MatrixIndexVecMatch match2 : vec2)
+		{
+			MatrixIndexVecMatch tMatch = match1;
+			tMatch.insert(tMatch.end(), match2.begin(), match2.end());
+			uniqueCombinations.push_back(tMatch);
+		}
+	}
+
+	return uniqueCombinations;
+};
