@@ -274,100 +274,102 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
 }
 
 
-/*INPUT_ASSIGNMENT BoolMatchSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop, int dropt_lit_conflict_limit, bool useRecurUnCore)
+pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg,
+    bool useLitDrop, int dropt_lit_conflict_limit, bool useRecurUnCore)
 {
+    // assert that the solver was init from aig, it is dual and it is in Tseitin encoding
+    assert(m_IsSolverInitFromAIG);
+    assert(m_IsDual);
+    assert(m_CirEncoding == TSEITIN_ENC);
+
     // valid return status should be unsat
-    SOLVER_RET_STATUS resStatus = UNSAT_RET_STATUS;
+    SOLVER_RET_STATUS resStatus = ERR_RET_STATUS;
     vector<SATLIT> assumpForSolver;
-    INPUT_ASSIGNMENT coreValues = {};
 
-    // in case no assumption mean Tautology
-    if (initialValues.empty())
+    INPUT_ASSIGNMENT genSrcAssg = srcAssg;
+    INPUT_ASSIGNMENT genTrgAssg = trgAssg;
+
+    // remove all the DC values from the assignment
+    RemoveDCFromInputAssg(genSrcAssg);
+    RemoveDCFromInputAssg(genTrgAssg);
+
+    // TODO check this is indeed the correct behavior
+    // if one of the values is empty, meaning that no matter what it will always output the same value
+    // and the other circuit have CEX, so we can just return the values
+    if (genSrcAssg.empty() || genTrgAssg.empty())
     {
-        cout << "c Tautology found, no need for dual check." << endl;
-        return initialValues;
+        return make_pair(srcAssg, trgAssg);
     }
-
     
-    // copy to another vec
-    INPUT_ASSIGNMENT initValuesNoDC = initialValues;
-    // remove all dc
-    initValuesNoDC.erase(std::remove_if(initValuesNoDC.begin(), initValuesNoDC.end(), [](const pair<AIGLIT, TVal>& assign)
+    // now add the src and trg values assump
+    for (const pair<AIGLIT, TVal>& assign : genSrcAssg)
     {
-        return assign.second == TVal::DontCare;
-    }), initValuesNoDC.end());
-        
-    switch (m_CirEncoding)
-    {
-        case TSEITIN_ENC:
-        {
-            for (const pair<AIGLIT, TVal>& assign : initValuesNoDC)
-            {
-                if (assign.second == TVal::True)
-                {
-                    assumpForSolver.push_back(AIGLitToSATLit(assign.first));
-                }
-                else if (assign.second == TVal::False)
-                {
-                    assumpForSolver.push_back(-AIGLitToSATLit(assign.first));
-                }
-            }
-
-        break;
-        }
-        case DUALRAIL_ENC:
-        {
-            for (const pair<AIGLIT, TVal>& assign : initValuesNoDC)
-            {
-                DRVAR drVar = AIGLitToDR(assign.first);
-                if (assign.second == TVal::True)
-                {
-                    assumpForSolver.push_back(GetPos(drVar));
-                }
-                else if (assign.second == TVal::False)
-                {
-                    assumpForSolver.push_back(GetNeg(drVar));
-                }
-            }
-
-        break;
-        }
-        default:
-        {
-            throw runtime_error("Unkown circuit encoding");
-
-        break;
-        }
+        SATLIT lit = AIGLitToSATLit(assign.first, 0);   
+        assumpForSolver.push_back(assign.second == TVal::True ? lit : NegateSATLit(lit));
     }
 
-    // assumpForSolver corresponds to initValuesNoDC
+    size_t assumpSizeAfterSrcValAssmp = assumpForSolver.size();
+
+    for (const pair<AIGLIT, TVal>& assign : genTrgAssg)
+    {
+        SATLIT lit = AIGLitToSATLit(assign.first, m_TargetSATLitOffset);   
+        assumpForSolver.push_back(assign.second == TVal::True ? lit : NegateSATLit(lit));
+    }
+
+    // assumpForSolver corresponds to assignment values from src and trg
     resStatus = SolveUnderAssump(assumpForSolver);
 
-    // in case of timeout just return initialValues
+    // in case of timeout just return original values
     if (resStatus == TIMEOUT_RET_STATUS)
     {
-        return initialValues;
+        return make_pair(srcAssg, trgAssg);
     }
     if (resStatus == SAT_RET_STATUS)
     {
         throw runtime_error("UnSAT core call return SAT status");
     }
 
-    // used only if useLitDrop = true
-    vector<SATLIT> litDropAsmpForSolver;
-
-    for (size_t assumPos = 0; assumPos < assumpForSolver.size(); assumPos++)
+    // temporary store the core values (instead of removing them from the vector)
+    INPUT_ASSIGNMENT trgTmpCoreValues;
+    // this will hold remained values assumptions after the process
+    vector<SATLIT> trgCoreAssmp;
+    // now we iterate and try to remove unncessary assignments
+    // start with the secondary inputs
+    for (size_t assumpIndex = assumpSizeAfterSrcValAssmp; assumpIndex < assumpForSolver.size(); ++assumpIndex) 
     {
-        if (IsAssumptionRequired(assumPos))
+        if (IsAssumptionRequired(assumpIndex))
         {
-            // assumpForSolver corresponds to initValuesNoDC
-            coreValues.push_back(initValuesNoDC[assumPos]);
-            litDropAsmpForSolver.push_back(assumpForSolver[assumPos]);
+            trgTmpCoreValues.push_back(genTrgAssg[assumpIndex - assumpSizeAfterSrcValAssmp]);
+            if (useLitDrop)
+            {
+                trgCoreAssmp.push_back(assumpForSolver[assumpIndex]);
+            }
         }
     }
 
+    genTrgAssg = trgTmpCoreValues;
+
+    // temporary store the core values (instead of removing them from the vector)
+    INPUT_ASSIGNMENT srcTmpCoreValues;
+    // this will hold remained values assumptions after the process
+    vector<SATLIT> srcCoreAssmp;
+    // now the primary inputs
+    for (size_t assumpIndex = 0; assumpIndex < assumpSizeAfterSrcValAssmp; ++assumpIndex) 
+    {
+        if (IsAssumptionRequired(assumpIndex))
+        {
+            srcTmpCoreValues.push_back(genSrcAssg[assumpIndex]);
+            if (useLitDrop)
+            {
+                srcCoreAssmp.push_back(assumpForSolver[assumpIndex]);
+            }
+        }
+    }
+
+    genSrcAssg = srcTmpCoreValues;
+
     // try to drop literals from the unSAT core and check if still Unsat
-    if (useLitDrop)
+    /*if (useLitDrop)
     {
         // iterating from back to begin to support remove and iteration of vector
         for (int assumpIndex = litDropAsmpForSolver.size() - 1; assumpIndex >= 0; --assumpIndex) 
@@ -424,11 +426,10 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
                 throw runtime_error("UnSAT core drop literal strategy return unkown status");
             }
         }
-    }
+    }*/
     
-    return coreValues;
-}*/
-
+    return make_pair(genSrcAssg, genTrgAssg);
+}
 
 void BoolMatchSolverBase::AssertOutputDiff(bool isNegMatch)
 {

@@ -126,13 +126,15 @@ public:
     // used for getting assigment from solver for the circuit inputs
     INPUT_ASSIGNMENT GetAssignmentForAIGLits(const std::vector<AIGLIT>& aigLits, bool isLitFromSrc) const;
 
-    // get unsat core under the assumption of initialValues
-    // return result assignment of the core
-    // if timeout return initialValues
+    // get unsat core under the assumption of the assignments from the src and trg
+    // return the result assignment of the core for the src and trg in the form of <src, trg>
+    // if timeout return the inital values
+    // isAssgFromSrc - if the assignment is from the source circuit or the target circuit
     // useLitDrop - if to use literal dropping startegy
     // dropt_lit_conflict_limit - limit the conflict limit for each check for drop lit
     // useRecurUnCore - if to use unsat core extraction recursivly with each drop lit check
-    //INPUT_ASSIGNMENT GetUnSATCore(const INPUT_ASSIGNMENT& initialValues, bool useLitDrop = false, int dropt_lit_conflict_limit = -1, bool useRecurUnCore = false);
+    // NOTE: we assume this is a dual solver, and the assignment is from the plain solver
+    std::pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> GetUnSATCore(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg, bool useLitDrop = false, int dropt_lit_conflict_limit = -1, bool useRecurUnCore = false);
 
     // assert that the outputs differ
     // this is usfull since if we want to check if to outputs are equal, we check that they can not be different
