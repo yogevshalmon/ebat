@@ -80,6 +80,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		}
 		else if (res == TIMEOUT_RET_STATUS)
 		{
+            // TODO: should we throw exception here?
 			m_IsTimeOut = true;
 			throw runtime_error("Timeout reached");
 		}
@@ -89,11 +90,14 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		}
 	};
 
+    // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfMatch = 0;
 
-    while (m_InputMatchMatrix->FindNextMatch() == SAT_RET_STATUS)
+    SOLVER_RET_STATUS nextMatch = m_InputMatchMatrix->FindNextMatch();
+    while (nextMatch == SAT_RET_STATUS)
     {
         numOfMatch++;
+        m_TotalNumberOfMatches++;
 
         MatrixIndexVecMatch currMatch = m_InputMatchMatrix->GetCurrMatch();
 
@@ -124,45 +128,39 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
             PrintModel(srcAssg);
             PrintModel(trgAssg);
 
-            m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAssg, true), InputAssg2Indx(trgAssg, false));
+            clock_t beforeGen = clock();
+            INPUT_ASSIGNMENT srcGenAssignment = GeneralizeModel(srcAssg, true);
+            INPUT_ASSIGNMENT trgGenAssignment = GeneralizeModel(trgAssg, false);
+            unsigned long genCpuTimeTaken =  clock() - beforeGen;
+            double genTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+
+            m_TimeOnGeneralization += genTime;
+
+            cout << "c After generalization" << endl;
+            PrintModel(srcGenAssignment);
+            PrintModel(trgGenAssignment);
+
+            m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcGenAssignment, true), InputAssg2Indx(trgGenAssignment, false));
         }
-        // clock_t beforeGen = clock();
-        // INPUT_ASSIGNMENT minAssignment = GeneralizeModel(initialAssignment);
-        // unsigned long genCpuTimeTaken =  clock() - beforeGen;
-        // double genTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+        
+        nextMatch = m_InputMatchMatrix->FindNextMatch();
+    }
 
-        // m_TimeOnGeneralization += genTime;
-
-        // // if timeout exit skip check for tautology
-        // if (m_IsTimeOut)
-        // {
-        //     //break;
-        // }
-
-        // unsigned currNumOfDC = GetNumOfDCFromInputAssignment(minAssignment); 
-
-        // // no blocking clause, all inputs are DC -> tautology
-        // if (currNumOfDC == m_InputSize)
-        // {
-        //     cout << "c Tautology found" << endl;
-        // }
-        // else
-        // {
-        //     if (m_PrintMatches)
-        //     {
-        //         PrintModel(minAssignment);
-        //     }
-        // }
+    // check for timeout
+    if (nextMatch == TIMEOUT_RET_STATUS)
+    {
+        m_IsTimeOut = true;
+		throw runtime_error("Timeout reached");
     }
 }
 
-INPUT_ASSIGNMENT BoolMatchAlgIterTseitinEnc::GeneralizeModel(const INPUT_ASSIGNMENT& model)
+INPUT_ASSIGNMENT BoolMatchAlgIterTseitinEnc::GeneralizeModel(const INPUT_ASSIGNMENT& model, bool isSrc)
 { 
     INPUT_ASSIGNMENT generalizeModel = model;
-    // if (m_UseCirSim)
-    // {
-    //     generalizeModel = GeneralizeWithCirSimulation(generalizeModel);
-    // }
+    if (m_UseCirSim)
+    {
+        generalizeModel = GeneralizeWithCirSimulation(generalizeModel, isSrc ? m_SrcCirSimulation : m_TrgCirSimulation);
+    }
     // if (m_UseDualSolver)
     // {
     //     generalizeModel = m_DualSolver->GetUnSATCore(generalizeModel, m_UseLitDrop, m_LitDropConflictLimit, m_LitDropChekRecurCore);

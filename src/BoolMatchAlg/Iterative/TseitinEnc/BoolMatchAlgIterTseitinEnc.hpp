@@ -20,7 +20,8 @@ class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
 
         virtual void FindAllMatchesUnderOutputAssert();
         
-        INPUT_ASSIGNMENT GeneralizeModel(const INPUT_ASSIGNMENT& model);
+        // generalize model from either src or trg
+        INPUT_ASSIGNMENT GeneralizeModel(const INPUT_ASSIGNMENT& model, bool isSrc);
     
         // *** Params ***
 
