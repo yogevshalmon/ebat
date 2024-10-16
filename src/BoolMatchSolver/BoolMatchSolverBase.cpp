@@ -369,38 +369,43 @@ pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const
     genSrcAssg = srcTmpCoreValues;
 
     // try to drop literals from the unSAT core and check if still Unsat
-    /*if (useLitDrop)
+    if (useLitDrop)
     {
-        // iterating from back to begin to support remove and iteration of vector
-        for (int assumpIndex = litDropAsmpForSolver.size() - 1; assumpIndex >= 0; --assumpIndex) 
-        {
-            // Temporary store the current assump lit
-            SATLIT tempLit = litDropAsmpForSolver[assumpIndex];
+        assumpForSolver.clear();
+        // reinsert the current core values for src and trg
+        assumpForSolver.insert(assumpForSolver.end(), srcCoreAssmp.begin(), srcCoreAssmp.end());
+        assumpSizeAfterSrcValAssmp = assumpForSolver.size();
+        assumpForSolver.insert(assumpForSolver.end(), trgCoreAssmp.begin(), trgCoreAssmp.end());
 
-            // Remove the current lit from the, copy the last element
-            litDropAsmpForSolver[assumpIndex] = litDropAsmpForSolver.back();
-            litDropAsmpForSolver.pop_back();
+        // iterate over the target values/assump
+        for (int assumpIndex = (int)assumpForSolver.size() - 1; assumpIndex >= (int)assumpSizeAfterSrcValAssmp; --assumpIndex) 
+        {
+            // Temporary store the current match
+            SATLIT tempAssmpLit = assumpForSolver[assumpIndex];
+
+            // copy the last element (remove the current assump) then remove the duplicate
+            assumpForSolver[assumpIndex] = assumpForSolver.back();
+            assumpForSolver.pop_back();
 
             if (dropt_lit_conflict_limit > 0)
             {
                 SetConflictLimit(dropt_lit_conflict_limit);
             }
 
-            resStatus = SolveUnderAssump(litDropAsmpForSolver);
+            resStatus = SolveUnderAssump(assumpForSolver);
 
-            // in case of timeout, exit and then return the current core
+            // in case of timeout, return the current core found
             if (resStatus == TIMEOUT_RET_STATUS)
             {
-                break;
+                return make_pair(genSrcAssg, genTrgAssg);
             }
-           
             if (resStatus == UNSAT_RET_STATUS) 
             {
                 // TODO change erase to more effienct without order?
                 // still unsat we can remove the correspond lit assignment from the core
-                coreValues.erase(coreValues.begin() + assumpIndex);
+                genTrgAssg.erase(genTrgAssg.begin() + (assumpIndex - assumpSizeAfterSrcValAssmp));
 
-                if (useRecurUnCore)
+                /*if (useRecurUnCore)
                 {
                     // check recursive the UnsatCore
                     for (int newCoreassumPos = assumpIndex - 1; newCoreassumPos >= 0; --newCoreassumPos)
@@ -413,20 +418,75 @@ pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const
                             assumpIndex--;
                         }
                     }
-                }
+                }*/
             } 
             else if (resStatus == SAT_RET_STATUS) 
             {
                 // we can not remove the lit from the core
                 // restore the lit to the vector, where the position is changed (should not be a problem)
-                litDropAsmpForSolver.push_back(tempLit);
+                assumpForSolver.push_back(tempAssmpLit);
             }
             else
             {
                 throw runtime_error("UnSAT core drop literal strategy return unkown status");
             }
         }
-    }*/
+
+        // iterate over the source values/assump
+        for (int assumpIndex = (int)assumpSizeAfterSrcValAssmp - 1; assumpIndex >= 0; --assumpIndex)
+        {
+            // Temporary store the current match
+            SATLIT tempAssmpLit = assumpForSolver[assumpIndex];
+
+            // copy the last element (remove the current assump) then remove the duplicate
+            assumpForSolver[assumpIndex] = assumpForSolver.back();
+            assumpForSolver.pop_back();
+
+            if (dropt_lit_conflict_limit > 0)
+            {
+                SetConflictLimit(dropt_lit_conflict_limit);
+            }
+
+            resStatus = SolveUnderAssump(assumpForSolver);
+
+            // in case of timeout, return the current core found
+            if (resStatus == TIMEOUT_RET_STATUS)
+            {
+                return make_pair(genSrcAssg, genTrgAssg);
+            }
+            if (resStatus == UNSAT_RET_STATUS) 
+            {
+                // TODO change erase to more effienct without order?
+                // still unsat we can remove the correspond lit assignment from the core
+                genSrcAssg.erase(genSrcAssg.begin() + assumpIndex);
+
+                /*if (useRecurUnCore)
+                {
+                    // check recursive the UnsatCore
+                    for (int newCoreassumPos = assumpIndex - 1; newCoreassumPos >= 0; --newCoreassumPos)
+                    {
+                        if (!IsAssumptionRequired(newCoreassumPos))
+                        {
+                            litDropAsmpForSolver.erase(litDropAsmpForSolver.begin() + newCoreassumPos);
+                            coreValues.erase(coreValues.begin() + newCoreassumPos);
+                            // reduce the current index also, skipping the removed stuff
+                            assumpIndex--;
+                        }
+                    }
+                }*/
+            } 
+            else if (resStatus == SAT_RET_STATUS) 
+            {
+                // we can not remove the lit from the core
+                // restore the lit to the vector, where the position is changed (should not be a problem)
+                assumpForSolver.push_back(tempAssmpLit);
+            }
+            else
+            {
+                throw runtime_error("UnSAT core drop literal strategy return unkown status");
+            }
+        }
+    }
     
     return make_pair(genSrcAssg, genTrgAssg);
 }
