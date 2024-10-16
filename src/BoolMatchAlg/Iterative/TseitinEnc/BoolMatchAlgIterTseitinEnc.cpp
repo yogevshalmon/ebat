@@ -52,7 +52,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		{
 			bool isMatchPos = IsMatchPos(match);
 
-            cout << "c curr assume match, is pos " << isMatchPos << " " << match.first << " -> " << match.second << endl; 
+            // cout << "c curr assume match, is pos " << isMatchPos << " " << match.first << " -> " << match.second << endl; 
 
             AIGLIT srcLit = m_SrcInputs[GetAbsRealIndex(match.first)];
             AIGLIT trgLit = m_TrgInputs[GetAbsRealIndex(match.second)];
@@ -124,7 +124,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
             PrintModel(srcAssg);
             PrintModel(trgAssg);
 
-            m_InputMatchMatrix->EliminateMatch(currMatch);
+            m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAssg, true), InputAssg2Indx(trgAssg, false));
         }
         // clock_t beforeGen = clock();
         // INPUT_ASSIGNMENT minAssignment = GeneralizeModel(initialAssignment);
