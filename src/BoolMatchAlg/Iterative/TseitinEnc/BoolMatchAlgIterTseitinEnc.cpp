@@ -129,8 +129,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
             // PrintModel(trgAssg);
 
             clock_t beforeGen = clock();
-            INPUT_ASSIGNMENT srcGenAssignment = GeneralizeModel(srcAssg, true);
-            INPUT_ASSIGNMENT trgGenAssignment = GeneralizeModel(trgAssg, false);
+            pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> srcAndTrgGen = GeneralizeModel(srcAssg, trgAssg);
             unsigned long genCpuTimeTaken =  clock() - beforeGen;
             double genTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
 
@@ -140,7 +139,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
             // PrintModel(srcGenAssignment);
             // PrintModel(trgGenAssignment);
 
-            m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcGenAssignment, true), InputAssg2Indx(trgGenAssignment, false));
+            m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAndTrgGen.first, true), InputAssg2Indx(srcAndTrgGen.second, false));
         }
         
         nextMatch = m_InputMatchMatrix->FindNextMatch();
@@ -154,16 +153,20 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
     }
 }
 
-INPUT_ASSIGNMENT BoolMatchAlgIterTseitinEnc::GeneralizeModel(const INPUT_ASSIGNMENT& model, bool isSrc)
+pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchAlgIterTseitinEnc::GeneralizeModel(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg)
 { 
-    INPUT_ASSIGNMENT generalizeModel = model;
+    INPUT_ASSIGNMENT generalizeSrcModel = srcAssg;
+    INPUT_ASSIGNMENT generalizeTrgModel = trgAssg;
     if (m_UseCirSim)
     {
-        generalizeModel = GeneralizeWithCirSimulation(generalizeModel, isSrc ? m_SrcCirSimulation : m_TrgCirSimulation);
+        generalizeSrcModel = GeneralizeWithCirSimulation(generalizeSrcModel, m_SrcCirSimulation);
+        generalizeTrgModel = GeneralizeWithCirSimulation(generalizeTrgModel, m_TrgCirSimulation);
     }
-    // if (m_UseDualSolver)
-    // {
-    //     generalizeModel = m_DualSolver->GetUnSATCore(generalizeModel, m_UseLitDrop, m_LitDropConflictLimit, m_LitDropChekRecurCore);
-    // }
-    return generalizeModel;
+    if (m_UseDualSolver)
+    {
+        pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> generalizedModels = m_DualSolver->GetUnSATCore(generalizeSrcModel, generalizeTrgModel, m_UseLitDrop, m_LitDropConflictLimit, m_LitDropChekRecurCore);
+        generalizeSrcModel = generalizedModels.first;
+        generalizeTrgModel = generalizedModels.second;
+    }
+    return make_pair(generalizeSrcModel, generalizeTrgModel);
 };
