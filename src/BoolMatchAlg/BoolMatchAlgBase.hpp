@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include "Globals/BoolMatchGloblas.hpp"
 #include "Globals/BoolMatchSolverGloblas.hpp"
@@ -52,6 +53,9 @@ class BoolMatchAlgBase
 
         unsigned GetNumOfDCFromInputAssignment(const INPUT_ASSIGNMENT& assignment) const;
 
+        // convert INPUT_ASSIGNMENT to MULT_INDX_ASSIGNMENT
+        MULT_INDX_ASSIGNMENT InputAssg2Indx(const INPUT_ASSIGNMENT& assignment, bool isSrc) const;
+
         // *** Params ***
 
         // if to print the enumerated matches
@@ -76,6 +80,10 @@ class BoolMatchAlgBase
         std::vector<AIGLIT> m_TrgInputs;
         // size of m_Inputs (should be the same for src and trg)
         size_t m_InputSize;
+
+        // hold the mapping from AIG lit to index
+        std::unordered_map<AIGLIT, INDEX> srcLit2Indx;
+        std::unordered_map<AIGLIT, INDEX> trgLit2Indx;
 
 		// *** Stats ***
 

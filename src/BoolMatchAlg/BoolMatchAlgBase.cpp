@@ -85,7 +85,14 @@ void BoolMatchAlgBase::InitializeFromAIGs(const std::string& srcFileName, const 
         throw runtime_error("Src and Trg circuits have different number of inputs");
     }
 
-    // TODO add AIG to index map
+    for (size_t i = 0; i < m_InputSize; i++)
+    {
+        srcLit2Indx[m_SrcInputs[i]] = i;
+        srcLit2Indx[NegateAIGLit(m_SrcInputs[i])] = -i;
+
+        trgLit2Indx[m_TrgInputs[i]] = i;
+        trgLit2Indx[NegateAIGLit(m_TrgInputs[i])] = -i;
+    }
 
     // call the derived class to initilize the data
     _InitializeFromAIGs();
@@ -170,4 +177,15 @@ unsigned BoolMatchAlgBase::GetNumOfDCFromInputAssignment(const INPUT_ASSIGNMENT&
     });
     assert(numOfBoolVal >= 0);
     return (unsigned)m_InputSize - (unsigned)numOfBoolVal;
+}
+
+MULT_INDX_ASSIGNMENT BoolMatchAlgBase::InputAssg2Indx(const INPUT_ASSIGNMENT& assignment, bool isSrc) const
+{
+    MULT_INDX_ASSIGNMENT indxAssg(assignment.size());
+    transform(assignment.begin(), assignment.end(), indxAssg.begin(), [&](const pair<AIGLIT, TVal>& assign)
+    {
+        return make_pair(isSrc ? srcLit2Indx.at(assign.first) : trgLit2Indx.at(assign.first), assign.second);
+    });
+
+    return indxAssg;
 }
