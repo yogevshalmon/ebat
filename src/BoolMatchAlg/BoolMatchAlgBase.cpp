@@ -17,7 +17,8 @@ m_TimeOut(inputParser.getUintCmdOption("/general/timeout", DEF_TIMEOUT)),
 m_IsInit(false),
 m_IsTimeOut(false), 
 m_TimeOnGeneralization(0),
-m_NumberOfValidMatches(0)
+m_NumberOfValidMatches(0),
+m_TotalNumberOfMatches(0)
 {
     m_Clk = clock();
 }
@@ -100,6 +101,32 @@ void BoolMatchAlgBase::InitializeFromAIGs(const std::string& srcFileName, const 
     m_IsInit = true;
 }
 
+
+void BoolMatchAlgBase::FindAllMatches()
+{
+    assert(m_IsInit);
+
+    PrintInitialInformation();
+
+    try
+    {
+        _FindAllMatches();
+    }
+    catch(const std::exception& e)
+    {
+        if (m_IsTimeOut)
+		{
+			cout << "c TIMEOUT reach" << endl;
+			return;
+		}
+		else
+		{
+			// rethrow exception
+			throw;
+		}	
+    }
+};
+
 void BoolMatchAlgBase::PrintResult(bool wasInterrupted)
 {
     bool isInterrupted = m_IsTimeOut || wasInterrupted;
@@ -115,6 +142,7 @@ void BoolMatchAlgBase::PrintResult(bool wasInterrupted)
         cout << "+";
     }
     cout << endl;
+    cout << "c Total Number of matches iterated: " << m_TotalNumberOfMatches << endl;
     cout << "c Percentage of time spent on generalization: " << m_TimeOnGeneralization/Time;
 
     cout << endl;
@@ -136,7 +164,7 @@ void BoolMatchAlgBase::PrintIndexVal(const AIGINDEX litIndex, const TVal& currVa
     else if (currVal == TVal::DontCare) // dont care case
     {
         // Note: for now print nothing
-        //cout << "x ";
+        cout << "x ";
     }
     else
     {

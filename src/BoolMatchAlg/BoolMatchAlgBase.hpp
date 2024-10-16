@@ -26,7 +26,7 @@ class BoolMatchAlgBase
         void InitializeFromAIGs(const std::string& srcFileName, const std::string& trgFileName);
 
         // find all the boolean matches for the given AIGs 
-        virtual void FindAllMatches() = 0;
+        void FindAllMatches();
 
         void PrintResult(bool wasInterrupted = false);
 
@@ -41,6 +41,9 @@ class BoolMatchAlgBase
 
         // handle the initialization after we parse the AIG and init the src and trg inputs
         virtual void _InitializeFromAIGs() = 0;
+
+        // handle the main part of the algorithm where we find all the matches
+        virtual void _FindAllMatches() = 0;
 
         // print single model for the inputs
         void PrintModel(const INPUT_ASSIGNMENT& model);
@@ -70,6 +73,9 @@ class BoolMatchAlgBase
         // if the alg solver was init
         bool m_IsInit;
 
+        // if timeout happend
+        bool m_IsTimeOut;
+
         // parser for Aiger files 
         AigerParser m_AigParserSrc;
         AigerParser m_AigParserTrg;
@@ -88,10 +94,10 @@ class BoolMatchAlgBase
 		// *** Stats ***
 
 		clock_t m_Clk;
-        // if timeout happend
-        bool m_IsTimeOut;
         // time spent on generalization
         double m_TimeOnGeneralization;
-        // number of matches found
+        // number of valid matches found
         unsigned long long m_NumberOfValidMatches;
+        // total number of matches found (valid and invalid)
+        unsigned long long m_TotalNumberOfMatches;
 };
