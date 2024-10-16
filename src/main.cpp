@@ -44,7 +44,7 @@ void PrintUsage()
     // additonal parameters
     cout << endl;
     cout << "additonal parameters can be provided in [additonal parameters]:" << endl;
-    cout << "Runnig example: \n\t ./boolmatch_tool ../benchmarks/AND.aag /mode core /general/timeout 60 /general/print_matches 0" << endl;
+    cout << "Runnig example: \n\t ./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /general/print_matches 0" << endl;
 
     cout << endl;
     cout << "General:" << endl;
