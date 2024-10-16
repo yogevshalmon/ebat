@@ -9,8 +9,8 @@ BoolMatchAlgIterBase::BoolMatchAlgIterBase(const InputParser& inputParser):
 BoolMatchAlgBase(inputParser),
 // defualt is false
 m_UseCirSim(inputParser.getBoolCmdOption("/alg/iter/use_cirsim", false)),
-// default is false
-m_UseTopToBotSim(inputParser.getBoolCmdOption("/alg/iter/use_top_to_bot_sim", false)),
+// default is true
+m_UseTopToBotSim(inputParser.getBoolCmdOption("/alg/iter/use_top_to_bot_sim", true)),
 // default is false
 m_UseDualSolver(inputParser.getBoolCmdOption("/alg/iter/use_ucore", false)),
 // default is true
@@ -60,19 +60,14 @@ void BoolMatchAlgIterBase::_InitializeFromAIGs()
 }
 
 
-void BoolMatchAlgIterBase::FindAllMatches()
+void BoolMatchAlgIterBase::_FindAllMatches()
 {
-    assert(m_IsInit);
-
-    PrintInitialInformation();
-
     SOLVER_RET_STATUS res = m_Solver->Solve();
 
     if (res == TIMEOUT_RET_STATUS || m_IsTimeOut)
     {
-        cout << "c TIMEOUT reach" << endl;
         m_IsTimeOut = true;
-        return;
+        throw runtime_error("Timeout reached");
     }
 
     if (res != SAT_RET_STATUS)
@@ -124,5 +119,6 @@ void BoolMatchAlgIterBase::PrintInitialInformation()
 INPUT_ASSIGNMENT BoolMatchAlgIterBase::GeneralizeWithCirSimulation(const INPUT_ASSIGNMENT& model, CirSim* cirSim)
 {
     // use simulation for maximize dont-care values
-    return cirSim->MaximizeDontCare(model);
+    // we do not assume the output should remain 1
+    return cirSim->MaximizeDontCare(model, false);
 }

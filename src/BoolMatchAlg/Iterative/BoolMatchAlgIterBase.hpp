@@ -17,9 +17,6 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
 
         virtual ~BoolMatchAlgIterBase();
 
-        // find all the boolean matches for the given AIGs
-        virtual void FindAllMatches();
-
         void PrintResult(bool wasInterrupted = false);
 
     protected:
@@ -28,6 +25,9 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
         virtual void PrintInitialInformation();
 
         virtual void _InitializeFromAIGs();
+
+        // find all the boolean matches for the given AIGs
+        virtual void _FindAllMatches();
 
         // find all the boolean matches for the given AIGs
         // after we assert that the output diff
