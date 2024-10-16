@@ -17,7 +17,7 @@ enum CirEncoding : unsigned char
 // 20 : UnSAT
 // 0 : Timeout
 // -1 : Error 
-typedef int SOLVER_RET_STATUS;
+using SOLVER_RET_STATUS = int;
 
 // assignment for input use the AIGLIT of the input as index and TVal as value
 // can be partial assignment for the inputs where DC is allowed, if input not exist consider as DC
