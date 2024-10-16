@@ -75,8 +75,10 @@ void BoolMatchAlgIterBase::_FindAllMatches()
 		throw runtime_error("Initial model is not satisfiable. Please verify the logic model of the cells are correct.");
 	}
 
+    // TODO handle here the output assumption for plain and dual solvers
     // assert mitter on the circuit outputs
     m_Solver->AssertOutputDiff(false);
+    if (m_UseDualSolver) m_DualSolver->AssertOutputDiff(true);
 
     FindAllMatchesUnderOutputAssert();
 };
