@@ -70,7 +70,7 @@ public:
     // depends on m_NegMapIsAllowed and m_BlockMatchTypeWithInputsVal use differrnt schemes
     // values are ternary values
     // otherMatchData - if given will be used to also block the matches
-    void BlockMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    void BlockMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
         BoolMatchMatrixBase* otherMatchData = nullptr);
 
     // return m_MatchSelector
@@ -105,7 +105,7 @@ protected:
 
     // either eliminate all matches or enforce matches according to the current values of src and trg
     // where we assume no negated map is allowed
-    void EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    void EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
         BoolMatchMatrixBase* otherMatchData = nullptr);
 
     // eliminate all matches according to the current values of src and trg
@@ -115,12 +115,12 @@ protected:
     // consider the input values (1,X,X) and (1,X,X) the match x_11 will be blocked but we might get the same result if 1->2,2->1,3->3
     // this however is not a problem if the weak input assumption is used instead of very weak assumption.
     // also if Ucore generalization is used this also might casue a problem.
-    void EliminateMatchesByInputsValForNeg(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    void EliminateMatchesByInputsValForNeg(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
         BoolMatchMatrixBase* otherMatchData = nullptr);
 
     // Enforce matches according to the current values of src and trg
     // where we assume negated map is allowed
-    void EnforceMatchesByInputsValForNeg(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+    void EnforceMatchesByInputsValForNeg(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
         BoolMatchMatrixBase* otherMatchData = nullptr);
 
     // *** Params ***
@@ -176,7 +176,7 @@ protected:
      * @param combination The current combination being generated.
      * @param result The vector to store all generated combinations.
      */
-    void GenerateIndexCombinationsInternal(const INDX_ASSIGNMENT& indVec, int k, int start, INDX_ASSIGNMENT& combination, std::vector<INDX_ASSIGNMENT>& result);
+    void GenerateIndexCombinationsInternal(const MULT_INDX_ASSIGNMENT& indVec, int k, int start, MULT_INDX_ASSIGNMENT& combination, std::vector<MULT_INDX_ASSIGNMENT>& result);
 
     /**
      * Generates all possible combinations of indices from the given vector.
@@ -186,7 +186,7 @@ protected:
      * @param k The number of indices to choose in each combination.
      * @return A vector of vectors, where each inner vector represents a combination of indices.
      */
-    std::vector<INDX_ASSIGNMENT> GenerateIndexCombinations(const INDX_ASSIGNMENT& indVec, int k);
+    std::vector<MULT_INDX_ASSIGNMENT> GenerateIndexCombinations(const MULT_INDX_ASSIGNMENT& indVec, int k);
 
     // TODO check if timeout accord since the function can take a long time
     /**
@@ -200,5 +200,5 @@ protected:
      * @param secondVecIndx The second input assignment.
      * @return A vector of vectors, where each inner vector represents a combination of `TIndexMatch` values.
      */
-    static std::vector<MatrixIndexVecMatch> AllCombForNeg(const INDX_ASSIGNMENT& primVecIndx, const INDX_ASSIGNMENT& secondVecIndx);
+    static std::vector<MatrixIndexVecMatch> AllCombForNeg(const MULT_INDX_ASSIGNMENT& primVecIndx, const MULT_INDX_ASSIGNMENT& secondVecIndx);
 };

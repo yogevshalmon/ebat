@@ -57,7 +57,7 @@ void BoolMatchMatrixBase::AssertNoMatch()
 	}
 }
 
-void BoolMatchMatrixBase::BlockMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+void BoolMatchMatrixBase::BlockMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
     BoolMatchMatrixBase* otherMatchData)
 {
 	if (!m_NegMapIsAllowed)
@@ -82,7 +82,7 @@ void BoolMatchMatrixBase::BlockMatchesByInputsVal(const INDX_ASSIGNMENT& srcValu
 	}
 }
 
-void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
     BoolMatchMatrixBase* otherMatchData)
 {	
 	// check for the same size of inputs
@@ -104,7 +104,7 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGN
 	array<vector<unsigned>, 2> srcIndexPerValue = {vector<unsigned>(), vector<unsigned>()};
 	array<vector<unsigned>, 2> trgIndexPerValue = {vector<unsigned>(), vector<unsigned>()};
 
-	auto fillIndexes = [&](const INDX_ASSIGNMENT& values, array<vector<unsigned>,2>& indexPerValue) -> void
+	auto fillIndexes = [&](const MULT_INDX_ASSIGNMENT& values, array<vector<unsigned>,2>& indexPerValue) -> void
 	{
 		for (size_t i = 0; i < values.size(); i++)
 		{
@@ -243,16 +243,71 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const INDX_ASSIGN
 	}
 }
 
-void BoolMatchMatrixBase::EliminateMatchesByInputsValForNeg(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+void BoolMatchMatrixBase::EliminateMatchesByInputsValForNeg(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
     BoolMatchMatrixBase* otherMatchData)
 {
 }
 
 // Enforce matches according to the current values of src and trg
 // where we assume negated map is allowed
-void BoolMatchMatrixBase::EnforceMatchesByInputsValForNeg(const INDX_ASSIGNMENT& srcValues, const INDX_ASSIGNMENT& trgValues, 
+void BoolMatchMatrixBase::EnforceMatchesByInputsValForNeg(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
 	BoolMatchMatrixBase* otherMatchData)
 {
+	// verify that this function is used only when negated map is not allowed
+	assert(m_NegMapIsAllowed);
+	if (otherMatchData != nullptr)
+	{
+		assert(otherMatchData->m_NegMapIsAllowed == m_NegMapIsAllowed);
+	}
+
+	// will hold all the assignmenst of non-dc (0\1)
+	MULT_INDX_ASSIGNMENT srcNoDcIndx = srcValues;
+	RemoveDCFromAssg(srcNoDcIndx);
+
+	// will hold all the index of non-dc (0\1)
+	MULT_INDX_ASSIGNMENT trgNoDcIndx = trgValues;
+	RemoveDCFromAssg(trgNoDcIndx);
+
+	// check if one side contain all dc then there is no map
+	if (trgNoDcIndx.empty() || srcNoDcIndx.empty())
+	{
+		cout << "no non-dc values found" << endl;
+		AssertNoMatch();
+		if (otherMatchData != nullptr)
+		{
+			otherMatchData->AssertNoMatch();
+		}
+		return;
+	}
+
+	MatrixIndexVecMatch forcedMatchIndVec;
+	for (const INDX_ASSIGNMENT& srcAssg : srcNoDcIndx)
+	{
+		for(const INDX_ASSIGNMENT& trgAssg : trgNoDcIndx)
+		{
+			// TODO instad of +1 use global func?
+			// check if the values at the indx postions are the same
+			// use +1 for matrix indexes (start from 1)
+			MatrixIndexMatch forcedMatchInd = (GetValFromAssg(srcAssg) == GetValFromAssg(trgAssg)) ? make_pair((int)(GetIndFromAssg(srcAssg) + 1), -(int)(GetIndFromAssg(trgAssg) + 1)) : make_pair((int)(GetIndFromAssg(srcAssg) + 1), (int)(GetIndFromAssg(trgAssg) + 1));
+			// add the current forced match ind
+			forcedMatchIndVec.push_back(forcedMatchInd);
+		}
+	}
+
+	// print the forced match
+	cout << "Forced match: " << endl;
+	for (const MatrixIndexMatch& match : forcedMatchIndVec)
+	{
+		cout << "c " << match.first << " -> " << match.second << endl;
+	}
+
+	EnforceMatch(forcedMatchIndVec);
+
+	// if other matchData send eliminate from that aswell
+	if (otherMatchData != nullptr)
+	{
+		otherMatchData->EnforceMatch(forcedMatchIndVec);
+	}
 }
 
 void BoolMatchMatrixBase::ResetEliminatedMatches()
