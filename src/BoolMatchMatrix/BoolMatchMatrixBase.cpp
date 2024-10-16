@@ -262,11 +262,11 @@ void BoolMatchMatrixBase::EnforceMatchesByInputsValForNeg(const MULT_INDX_ASSIGN
 
 	// will hold all the assignmenst of non-dc (0\1)
 	MULT_INDX_ASSIGNMENT srcNoDcIndx = srcValues;
-	RemoveDCFromAssg(srcNoDcIndx);
+	RemoveDCFromIndxAssg(srcNoDcIndx);
 
 	// will hold all the index of non-dc (0\1)
 	MULT_INDX_ASSIGNMENT trgNoDcIndx = trgValues;
-	RemoveDCFromAssg(trgNoDcIndx);
+	RemoveDCFromIndxAssg(trgNoDcIndx);
 
 	// check if one side contain all dc then there is no map
 	if (trgNoDcIndx.empty() || srcNoDcIndx.empty())
