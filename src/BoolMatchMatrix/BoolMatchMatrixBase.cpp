@@ -295,11 +295,11 @@ void BoolMatchMatrixBase::EnforceMatchesByInputsValForNeg(const MULT_INDX_ASSIGN
 	}
 
 	// print the forced match
-	cout << "Forced match: " << endl;
-	for (const MatrixIndexMatch& match : forcedMatchIndVec)
-	{
-		cout << "c " << match.first << " -> " << match.second << endl;
-	}
+	// cout << "Forced match: " << endl;
+	// for (const MatrixIndexMatch& match : forcedMatchIndVec)
+	// {
+	// 	cout << "c " << match.first << " -> " << match.second << endl;
+	// }
 
 	EnforceMatch(forcedMatchIndVec);
 

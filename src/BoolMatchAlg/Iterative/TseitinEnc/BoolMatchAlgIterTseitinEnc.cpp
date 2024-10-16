@@ -101,7 +101,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         MatrixIndexVecMatch currMatch = m_InputMatchMatrix->GetCurrMatch();
 
-        cout << "c Match found: " << numOfMatch << endl;
+        //cout << "c Match found: " << numOfMatch << endl;
 
         // get the assumption for the current input match
         vector<SATLIT> assump = GetInputMatchAssump(currMatch);
@@ -110,23 +110,23 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		{
             m_NumberOfValidMatches++;
 
-            cout << "c Match is valid" << endl;
-            for (const MatrixIndexMatch& match : currMatch)
-            {
-                cout << "c " << match.first << " -> " << match.second << endl;
-            }
+            // cout << "c Match is valid" << endl;
+            // for (const MatrixIndexMatch& match : currMatch)
+            // {
+            //     cout << "c " << match.first << " -> " << match.second << endl;
+            // }
 
             m_InputMatchMatrix->EliminateMatch(currMatch);
         }
         else
         {
             // print the counter example
-            cout << "c Match is invalid" << endl;
+            //cout << "c Match is invalid" << endl;
             INPUT_ASSIGNMENT srcAssg = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
             INPUT_ASSIGNMENT trgAssg = m_Solver->GetAssignmentForAIGLits(m_TrgInputs, false);
             
-            PrintModel(srcAssg);
-            PrintModel(trgAssg);
+            // PrintModel(srcAssg);
+            // PrintModel(trgAssg);
 
             clock_t beforeGen = clock();
             INPUT_ASSIGNMENT srcGenAssignment = GeneralizeModel(srcAssg, true);
@@ -136,9 +136,9 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
             m_TimeOnGeneralization += genTime;
 
-            cout << "c After generalization" << endl;
-            PrintModel(srcGenAssignment);
-            PrintModel(trgGenAssignment);
+            // cout << "c After generalization" << endl;
+            // PrintModel(srcGenAssignment);
+            // PrintModel(trgGenAssignment);
 
             m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcGenAssignment, true), InputAssg2Indx(trgGenAssignment, false));
         }
