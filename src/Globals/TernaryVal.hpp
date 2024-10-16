@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <string>
+
 /*
     TVal
 */
@@ -12,6 +14,31 @@ enum TVal : unsigned char
   True,
   DontCare,
   UnKown
+};
+
+inline static bool IsTValBoolVal(const TVal& val)
+{
+    return (val == False) || (val == True);
+};
+
+inline static std::string GetTValStr(const TVal& val)
+{
+    if (val == False)
+    {
+        return "0";
+    }
+    else if (val == True)
+    {
+        return "1";
+    }
+    else if (val == DontCare)
+    {
+        return "X";
+    }
+    else
+    {
+        return "Z"; 
+    }
 };
 
 constexpr std::array<std::array<TVal, 4>, 4> TableAndGateVal = []
