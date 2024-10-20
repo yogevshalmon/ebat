@@ -183,6 +183,7 @@ protected:
     SATLIT m_MaxVar;
 
     // save the outputs of the circuits
+    // we save the lit since we can have either tseitin or dualrail encoding
     AIGLIT m_SrcOutputLit;
     AIGLIT m_TrgOutputLit;
 

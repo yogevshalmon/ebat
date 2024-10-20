@@ -9,7 +9,9 @@ m_CirEncoding(enc),
 m_IsSolverInitFromAIG(false),
 m_IsDual(isDual),
 m_TargetSATLitOffset(0),
-m_MaxVar(1)
+m_MaxVar(1),
+m_SrcOutputLit(0),
+m_TrgOutputLit(0)
 {
 }
 
