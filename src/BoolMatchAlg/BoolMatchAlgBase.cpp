@@ -116,7 +116,7 @@ void BoolMatchAlgBase::FindAllMatches()
     {
         if (m_IsTimeOut)
 		{
-			cout << "c TIMEOUT reach" << endl;
+			cout << "c Warning: timeout reached" << endl;
 			return;
 		}
 		else
@@ -136,11 +136,11 @@ void BoolMatchAlgBase::PrintResult(bool wasInterrupted)
     {
         cout << "c *** Interrupted *** " << endl;
     }
-    cout << "c Number of valid matches: " << m_NumberOfValidMatches;
-    if (isInterrupted)
+    else
     {
-        cout << "+";
+        cout << "c Finished solving the problem" << endl;
     }
+    cout << "c Number of valid matches: " << m_NumberOfValidMatches;
     cout << endl;
     cout << "c Total Number of matches iterated: " << m_TotalNumberOfMatches << endl;
     cout << "c Percentage of time spent on generalization: " << m_TimeOnGeneralization/Time;
