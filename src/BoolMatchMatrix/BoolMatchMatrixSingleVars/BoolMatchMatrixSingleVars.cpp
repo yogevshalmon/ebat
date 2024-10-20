@@ -107,19 +107,7 @@ void BoolMatchMatrixSingleVars::AssertRowAndCol(const MatrixIndexVecMatch& index
 					m_Solver->AddClause(NegateSATLit(negIndexVar));
 				}
 
-				/*else
-				{ // potentially use other methods to preffer positive matches
-					if (m_PrefferPosMatch)
-					{
-						posIndexVar.SetPreferredValue(1);
-					}
-
-					if (m_ForcePosMatch)
-					{
-						posIndexVar.ForceOrUnforceValue(1, true, false);
-					}
-
-				}*/
+				// TODO add other methods to preffer positive matches?
 			}
 		}
 	}
