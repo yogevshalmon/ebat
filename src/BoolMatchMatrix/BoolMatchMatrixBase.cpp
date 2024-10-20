@@ -10,7 +10,8 @@ m_BlockMatchTypeWithInputsVal(blockMatchTypeWithInputsVal),
 m_UseMatchSelector(useMatchSelector),
 m_NegMapIsAllowed(allowNegMap),
 m_Solver(solver),
-m_InputSize(inputSize)
+m_InputSize(inputSize),
+m_TimeOnNextMatch(0)
 {
     m_DataMatchMatrix = new MatrixIndexVars[GerMatrixSize()];
     for (unsigned i = 0; i < GerMatrixSize(); ++i)
@@ -31,8 +32,15 @@ BoolMatchMatrixBase::~BoolMatchMatrixBase()
 
 SOLVER_RET_STATUS BoolMatchMatrixBase::FindNextMatch()
 {
+	clock_t beforeCall = clock();
 	SOLVER_RET_STATUS res = ERR_RET_STATUS;
+
 	res = m_UseMatchSelector ? m_Solver->SolveUnderAssump({m_MatchSelector}) : m_Solver->Solve();
+
+	unsigned long genCpuTimeTaken =  clock() - beforeCall;
+	double nextMatchTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+	m_TimeOnNextMatch += nextMatchTime;
+
 	return res;
 }
 
@@ -393,3 +401,8 @@ vector<MatrixIndexVecMatch> BoolMatchMatrixBase::CombineAllComb(vector<MatrixInd
 
 	return uniqueCombinations;
 };
+
+void BoolMatchMatrixBase::PrintStats() const
+{
+	cout << "c Time on next match: " << m_TimeOnNextMatch << endl;
+}

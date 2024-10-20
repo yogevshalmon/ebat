@@ -28,7 +28,7 @@ class BoolMatchAlgBase
         // find all the boolean matches for the given AIGs 
         void FindAllMatches();
 
-        void PrintResult(bool wasInterrupted = false);
+        virtual void PrintResult(bool wasInterrupted = false);
 
     protected:
 

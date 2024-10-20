@@ -147,6 +147,8 @@ void BoolMatchAlgBase::PrintResult(bool wasInterrupted)
 
     cout << endl;
     cout << "c cpu time : " << Time <<" sec" << endl;
+
+    cout << "****************************************" << endl;
 }
 
 // print value of a single AIG index

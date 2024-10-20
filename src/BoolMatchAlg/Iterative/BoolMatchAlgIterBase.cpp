@@ -124,3 +124,10 @@ INPUT_ASSIGNMENT BoolMatchAlgIterBase::GeneralizeWithCirSimulation(const INPUT_A
     // we do not assume the output should remain 1
     return cirSim->MaximizeDontCare(model, false);
 }
+
+void BoolMatchAlgIterBase::PrintResult(bool wasInterrupted)
+{
+    BoolMatchAlgBase::PrintResult(wasInterrupted);
+    
+    m_InputMatchMatrix->PrintStats();
+}

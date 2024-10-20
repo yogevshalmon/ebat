@@ -85,6 +85,9 @@ public:
     // return the number of created blocked clauses to block matches
     unsigned long long GetNumOfBlockedClsMatches() const {return m_NumOfBlockedClsMatches;};
 
+    // print the stats of the class
+    void PrintStats() const;
+
 protected:
 
     // *** Functions ***
@@ -157,6 +160,9 @@ protected:
 
     // hold the last max value from EliminateOrEnforceMatchesByInputsVal
 	unsigned m_LastMaxVal;
+    
+    // the time spent on the last call to FindNextMatch
+    double m_TimeOnNextMatch;
 
     // *** Additonal help functions for the main BlockMatch functions ***
 
