@@ -51,8 +51,8 @@ public:
     // NOTE: only one match can be "ignored" i.e. eliminating [(1,3),(2,1),..] can cause the next search to find [(1,3),(2,2),..]
     // ignoreSelector - if to ignore the selector (if exist) when eliminating the match
     //					this is useful when we want to eliminate the match without the selector
-    // will be implemented in the derived classes	
-    virtual void EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector = false) = 0;
+    // Note - the actual implementation will be in the derived classes with _EliminateMatch	
+    void EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector = false);
 
     // the input vector contain vectors of matches that cant be together.
     // for example { {{1,2}}, {{3,2},{4,5}} } -> match(1,2) and match(3,2)&match(4,5) will be eliminted
@@ -60,7 +60,8 @@ public:
     void EliminateMatches(const std::vector<MatrixIndexVecMatch>& matchesToElim, const bool ignoreSelector = false);
 
     // enforce a single match, i.e. [(1,3),(2,1)] mean (1,3) -or- (2,1) must exist
-    virtual void EnforceMatch(const MatrixIndexVecMatch& matchToEnforce) = 0;
+    // Note - the actual implementation will be in the derived classes with _EnforceMatch
+    void EnforceMatch(const MatrixIndexVecMatch& matchToEnforce);
 
     // assert that no match can be found by just asserting false
     void AssertNoMatch();
@@ -105,6 +106,12 @@ protected:
     // create new vars and assert exactly 1 on every col and row
     // indexMapping: if given index mapping is not empty assert the mapping
     virtual void AssertRowAndCol(const MatrixIndexVecMatch& indexMapping) = 0;
+
+    // the actuall function to eliminate the match implemented in the derived classes
+    virtual void _EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector = false) = 0;
+
+    // the actuall function to enforce the match implemented in the derived classes
+    virtual void _EnforceMatch(const MatrixIndexVecMatch& matchToEnforce) = 0;
 
     // either eliminate all matches or enforce matches according to the current values of src and trg
     // where we assume no negated map is allowed
@@ -163,6 +170,15 @@ protected:
     
     // the time spent on the last call to FindNextMatch
     double m_TimeOnNextMatch;
+
+    // the time spent on using EliminateMatch
+    double m_TimeOnEliminateMatch;
+
+    // the time spent on using EnforceMatch
+    double m_TimeOnEnforceMatch;
+
+    // the time spent on blocking matches by inputs values
+    double m_TimeOnBlockMatchesByInputsVal;
 
     // *** Additonal help functions for the main BlockMatch functions ***
 

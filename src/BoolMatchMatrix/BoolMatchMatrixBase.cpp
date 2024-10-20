@@ -11,7 +11,10 @@ m_UseMatchSelector(useMatchSelector),
 m_NegMapIsAllowed(allowNegMap),
 m_Solver(solver),
 m_InputSize(inputSize),
-m_TimeOnNextMatch(0)
+m_TimeOnNextMatch(0),
+m_TimeOnEliminateMatch(0),
+m_TimeOnEnforceMatch(0),
+m_TimeOnBlockMatchesByInputsVal(0)
 {
     m_DataMatchMatrix = new MatrixIndexVars[GerMatrixSize()];
     for (unsigned i = 0; i < GerMatrixSize(); ++i)
@@ -44,6 +47,16 @@ SOLVER_RET_STATUS BoolMatchMatrixBase::FindNextMatch()
 	return res;
 }
 
+void BoolMatchMatrixBase::EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector)
+{
+	clock_t beforeCall = clock();
+
+	_EliminateMatch(matchToElim, ignoreSelector);
+
+	unsigned long genCpuTimeTaken =  clock() - beforeCall;
+	double callTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+	m_TimeOnEliminateMatch += callTime;
+}
 
 void BoolMatchMatrixBase::EliminateMatches(const vector<MatrixIndexVecMatch>& matchesToElim, const bool ignoreSelector)
 {
@@ -51,6 +64,17 @@ void BoolMatchMatrixBase::EliminateMatches(const vector<MatrixIndexVecMatch>& ma
 	{
 		EliminateMatch(matchToElim, ignoreSelector);
 	}
+}
+
+void BoolMatchMatrixBase::EnforceMatch(const MatrixIndexVecMatch& matchToEnforce)
+{
+	clock_t beforeCall = clock();
+
+	_EnforceMatch(matchToEnforce);
+
+	unsigned long genCpuTimeTaken =  clock() - beforeCall;
+	double callTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+	m_TimeOnEnforceMatch += callTime;
 }
 
 void BoolMatchMatrixBase::AssertNoMatch()
@@ -68,6 +92,8 @@ void BoolMatchMatrixBase::AssertNoMatch()
 void BoolMatchMatrixBase::BlockMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
     BoolMatchMatrixBase* otherMatchData)
 {
+	clock_t beforeCall = clock();
+
 	if (!m_NegMapIsAllowed)
 	{
 		EliminateOrEnforceMatchesByInputsVal(srcValues, trgValues, otherMatchData);
@@ -88,6 +114,9 @@ void BoolMatchMatrixBase::BlockMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& sr
 			EliminateMatchesByInputsValForNeg(srcValues, trgValues, otherMatchData);
 		}
 	}
+	unsigned long genCpuTimeTaken =  clock() - beforeCall;
+	double callTime = (double)(genCpuTimeTaken)/(double)(CLOCKS_PER_SEC);
+	m_TimeOnBlockMatchesByInputsVal += callTime;
 }
 
 void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
@@ -405,4 +434,7 @@ vector<MatrixIndexVecMatch> BoolMatchMatrixBase::CombineAllComb(vector<MatrixInd
 void BoolMatchMatrixBase::PrintStats() const
 {
 	cout << "c Time on next match: " << m_TimeOnNextMatch << endl;
+	cout << "c Time on eliminate match: " << m_TimeOnEliminateMatch << endl;
+	cout << "c Time on enforce match: " << m_TimeOnEnforceMatch << endl;
+	cout << "c Time on block matches by inputs val: " << m_TimeOnBlockMatchesByInputsVal << endl;
 }
