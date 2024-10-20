@@ -149,21 +149,3 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		throw runtime_error("Timeout reached");
     }
 }
-
-pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchAlgIterTseitinEnc::GeneralizeModel(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg)
-{ 
-    INPUT_ASSIGNMENT generalizeSrcModel = srcAssg;
-    INPUT_ASSIGNMENT generalizeTrgModel = trgAssg;
-    if (m_UseCirSim)
-    {
-        generalizeSrcModel = GeneralizeWithCirSimulation(generalizeSrcModel, m_SrcCirSimulation);
-        generalizeTrgModel = GeneralizeWithCirSimulation(generalizeTrgModel, m_TrgCirSimulation);
-    }
-    if (m_UseDualSolver)
-    {
-        pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> generalizedModels = m_DualSolver->GetUnSATCore(generalizeSrcModel, generalizeTrgModel, m_UseLitDrop, m_LitDropConflictLimit, m_LitDropChekRecurCore);
-        generalizeSrcModel = generalizedModels.first;
-        generalizeTrgModel = generalizedModels.second;
-    }
-    return make_pair(generalizeSrcModel, generalizeTrgModel);
-};

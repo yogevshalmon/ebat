@@ -34,6 +34,10 @@ class BoolMatchAlgIterBase : public BoolMatchAlgBase
         virtual void FindAllMatchesUnderOutputAssert() = 0;
         
         INPUT_ASSIGNMENT GeneralizeWithCirSimulation(const INPUT_ASSIGNMENT& model, CirSim* cirSim);
+
+        // generalize model of src and trg
+        // return the generalized assignment for the src and trg in the form of <src, trg>
+        std::pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> GeneralizeModel(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg);
         
         // *** Params ***
 
