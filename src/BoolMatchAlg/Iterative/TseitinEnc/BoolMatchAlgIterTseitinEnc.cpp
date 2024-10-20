@@ -63,7 +63,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		return assump;
 	};
 
-    auto CheckMatchUnderAssmp = [&](const vector<SATLIT>& assump) -> bool
+    auto CheckMatchUnderAssmp = [&](vector<SATLIT>& assump) -> bool
 	{
 		SOLVER_RET_STATUS res = ERR_RET_STATUS;
 
@@ -101,11 +101,8 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         MatrixIndexVecMatch currMatch = m_InputMatchMatrix->GetCurrMatch();
 
-        //cout << "c Match found: " << numOfMatch << endl;
-
         // get the assumption for the current input match
         vector<SATLIT> assump = GetInputMatchAssump(currMatch);
-        
         if (CheckMatchUnderAssmp(assump))
 		{
             m_NumberOfValidMatches++;
