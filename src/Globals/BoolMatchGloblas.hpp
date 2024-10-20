@@ -63,6 +63,12 @@ inline static SATLIT NegateSATLit(SATLIT lit)
     return -lit;
 }
 
+// get the abs lit - meaning the positive lit
+inline static SATLIT AbsSATLit(SATLIT lit)
+{
+    return abs(lit);
+}
+
 
 // return the sat lit for each AIG lit
 // defined as the correspond aig index + 1 
