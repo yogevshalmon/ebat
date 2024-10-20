@@ -136,7 +136,7 @@ void BoolMatchMatrixSingleVars::AssertRowAndCol(const MatrixIndexVecMatch& index
 	}
 }
 
-void BoolMatchMatrixSingleVars::EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector)
+void BoolMatchMatrixSingleVars::_EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector)
 {
 	vector<SATLIT> matrixVars;
 	// reserve one var per match
@@ -159,7 +159,7 @@ void BoolMatchMatrixSingleVars::EliminateMatch(const MatrixIndexVecMatch& matchT
 	m_NumOfBlockedClsMatches += 1;
 }
 
-void BoolMatchMatrixSingleVars::EnforceMatch(const MatrixIndexVecMatch& matchToEnforce)
+void BoolMatchMatrixSingleVars::_EnforceMatch(const MatrixIndexVecMatch& matchToEnforce)
 {
 	vector<SATLIT> matrixVars;
 	// reserve one var per match

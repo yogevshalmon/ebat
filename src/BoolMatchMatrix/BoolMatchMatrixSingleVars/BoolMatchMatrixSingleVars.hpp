@@ -14,10 +14,6 @@ public:
 
     // get the current match 
     MatrixIndexVecMatch GetCurrMatch() const;
-    // eliminate combination of matches
-    void EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector = false);
-    // enforce combinations of matches
-    void EnforceMatch(const MatrixIndexVecMatch& matchToEnforce);
 
 protected:
 
@@ -31,6 +27,11 @@ protected:
     // indexMapping: if given index mapping is not empty assert the mapping
     // indexMapStartPoint: if given index mapping is not empty start from the mapping by using force polarity
     void AssertRowAndCol(const MatrixIndexVecMatch& indexMapping);
+
+    // eliminate combination of matches
+    void _EliminateMatch(const MatrixIndexVecMatch& matchToElim, const bool ignoreSelector = false);
+    // enforce combinations of matches
+    void _EnforceMatch(const MatrixIndexVecMatch& matchToEnforce);
 
     /* Vars */
 
