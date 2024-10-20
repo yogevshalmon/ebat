@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <utility>
 
 #include "Globals/BoolMatchGloblas.hpp"
 #include "Globals/BoolMatchSolverGloblas.hpp"
@@ -167,11 +169,26 @@ protected:
     
     // *** Params ***
 
+    // Custom hash function for std::pair<unsigned, unsigned>
+    struct pair_hash {
+        template <class T1, class T2>
+        std::size_t operator() (const std::pair<T1, T2>& p) const {
+            auto hash1 = std::hash<T1>{}(p.first);
+            auto hash2 = std::hash<T2>{}(p.second);
+            return hash1 ^ (hash2 << 1); // Combine the two hash values
+        }
+    };
+
     // hold the encoding
     const CirEncoding m_CirEncoding;
 
     // hold if the current solver is dual represntation
     const bool m_IsDual;
+
+    // TODO add this as an option
+    // if to save and check the equal constraints for the inputs, which should reduce the number of clauses generated
+    // it will save time if there are many repeating equal constraints 
+    const bool m_CheckExistInputEqualAssmp;
     
     // *** Variables ***
     
@@ -186,6 +203,9 @@ protected:
     // we save the lit since we can have either tseitin or dualrail encoding
     AIGLIT m_SrcOutputLit;
     AIGLIT m_TrgOutputLit;
+
+    // for each 2 AIGLIT inputs we save the SAT lit that represent the equality
+    std::unordered_map<std::pair<AIGLIT, AIGLIT>, SATLIT, pair_hash> m_InputEqAssmpMap;
 
     // *** Stats ***
 

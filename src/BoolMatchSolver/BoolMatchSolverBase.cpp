@@ -6,8 +6,9 @@ using namespace std;
 BoolMatchSolverBase::BoolMatchSolverBase(const InputParser& inputParser, const CirEncoding& enc, const bool isDual):
 // the desire encoding
 m_CirEncoding(enc),
-m_IsSolverInitFromAIG(false),
 m_IsDual(isDual),
+m_CheckExistInputEqualAssmp(true),
+m_IsSolverInitFromAIG(false),
 m_TargetSATLitOffset(0),
 m_MaxVar(1),
 m_SrcOutputLit(0),
@@ -178,6 +179,16 @@ SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, 
 {
     assert(m_IsSolverInitFromAIG);
 
+    if (m_CheckExistInputEqualAssmp)
+    {
+        // check if we saved the eq assump for the two lits
+        auto it = m_InputEqAssmpMap.find(make_pair(srcAIGLit, trgAIGLit));
+        if (it != m_InputEqAssmpMap.end())
+        {
+            return isEq ? it->second : NegateSATLit(it->second);
+        }
+    }
+
     SATLIT res = CONST_LIT_TRUE;
 
     switch (m_CirEncoding)
@@ -188,6 +199,16 @@ SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, 
             SATLIT trgLit = AIGLitToSATLit(trgAIGLit, m_TargetSATLitOffset);
 
             res = isEq ? IsEqual(srcLit, trgLit) : IsNotEqual(srcLit, trgLit);
+
+            if (m_CheckExistInputEqualAssmp)
+            {
+                // save the eq assump for the two lits
+                SATLIT eqAssumpLit = isEq ? res : NegateSATLit(res);
+                m_InputEqAssmpMap[make_pair(srcAIGLit, trgAIGLit)] = eqAssumpLit;
+                m_InputEqAssmpMap[make_pair(NegateAIGLit(srcAIGLit), trgAIGLit)] = NegateSATLit(eqAssumpLit);
+                m_InputEqAssmpMap[make_pair(srcAIGLit, NegateAIGLit(trgAIGLit))] = NegateSATLit(eqAssumpLit);
+                m_InputEqAssmpMap[make_pair(NegateAIGLit(srcAIGLit), NegateAIGLit(trgAIGLit))] = eqAssumpLit;
+            }
 
         break;
         }
@@ -274,7 +295,6 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
 
     return assignment;
 }
-
 
 pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg,
     bool useLitDrop, int dropt_lit_conflict_limit, bool useRecurUnCore)
