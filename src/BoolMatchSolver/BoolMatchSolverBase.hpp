@@ -67,6 +67,18 @@ public:
     // assert that the two lits are not equal
     void AssertNotEqual(const SATLIT l1, const SATLIT l2);
 
+    // create constraints where the return lit specify if the two lits are equal for the DR enc
+    // X==1 = X
+    // X==0 = X
+    // X==X = X
+    SATLIT IsEqualDR(const DRVAR& l1, const DRVAR& l2);
+
+    // create constraints where the return lit specify if the two lits are not equal for the DR enc
+    // X!=1 = X
+    // X!=0 = X
+    // X!=X = X
+    SATLIT IsNotEqualDR(const DRVAR& l1, const DRVAR& l2);
+
     // return the next available SAT lit
     SATLIT GetNewVar();
 

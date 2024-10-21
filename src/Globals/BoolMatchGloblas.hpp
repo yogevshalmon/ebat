@@ -118,6 +118,11 @@ inline static SATLIT GetNeg(const DRVAR& dvar)
     return dvar.second;
 }
 
+inline static DRVAR NegateDRVar(const DRVAR& dvar)
+{
+    return {dvar.second, dvar.first};
+}
+
 // Get the two var represent the var_pos and var_neg from AIGLIT
 // if even i.e. 2 return 2,3
 // else odd i.e. 3 return 3,2

@@ -98,6 +98,27 @@ void BoolMatchSolverBase::AssertNotEqual(const SATLIT l1, const SATLIT l2)
     AssertEqual(l1, NegateSATLit(l2));
 }
 
+SATLIT BoolMatchSolverBase::IsEqualDR(const DRVAR& l1, const DRVAR& l2)
+{
+    SATLIT resVar = GetNewVar();
+
+    SATLIT OutTrueTrue = GetNewVar();
+    WriteAnd(OutTrueTrue, GetPos(l1), GetPos(l2));
+    SATLIT OutFalseFalse = GetNewVar();
+    WriteAnd(OutFalseFalse, GetNeg(l1), GetNeg(l2));
+    // model that either the values are 1,1 or 0,0
+    WriteOr(resVar, OutTrueTrue, OutFalseFalse);
+    
+    return resVar;
+}
+
+SATLIT BoolMatchSolverBase::IsNotEqualDR(const DRVAR& l1, const DRVAR& l2)
+{
+    // NOTE: we can not negate the returned SATLIT since it may not indicate it is actually not equal
+    // since the result of (1,x) will be 0 and we do not want to return 1, since 1!=X = X
+    return IsEqualDR(l1, NegateDRVar(l2));
+}
+
 SATLIT BoolMatchSolverBase::GetNewVar()
 {
     // update and return the next available SAT lit
@@ -214,7 +235,13 @@ SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, 
         }
         case DUALRAIL_ENC:
         {
-            throw runtime_error("Currently GetInputEqAssmp not supported in DR encoding");
+            DRVAR srcVar = AIGLitToDR(srcAIGLit, 0);
+            DRVAR trgVar = AIGLitToDR(trgAIGLit, m_TargetSATLitOffset);
+
+            res = isEq ? IsEqualDR(srcVar, trgVar) : IsNotEqualDR(srcVar, trgVar);
+
+            // TODO save the eq assump for the two lits NOTE!!!! not as simple as in tsietin
+
         break;
         }
         default:
@@ -531,6 +558,7 @@ void BoolMatchSolverBase::AssertOutputDiff(bool isNegMatch)
             DRVAR srcOutDRVar = AIGLitToDR(m_SrcOutputLit, 0);
             DRVAR trgOutDRVar = AIGLitToDR(isNegMatch ? NegateAIGLit(m_TrgOutputLit) : m_TrgOutputLit, m_TargetSATLitOffset);
             
+            // TODO move to general function like in the TSEITIN_ENC
             // if the output differ then it can either be 1,0 or 0,1
             SATLIT OutTrueFalse = GetNewVar();
             WriteAnd(OutTrueFalse, GetPos(srcOutDRVar), GetNeg(trgOutDRVar));
