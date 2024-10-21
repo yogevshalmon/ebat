@@ -5,7 +5,9 @@ using namespace std;
 BoolMatchAlgIterDREnc::BoolMatchAlgIterDREnc(const InputParser& inputParser):
 BoolMatchAlgIterBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_plain", false)),
-m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_dual", true))
+m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_dual", true)),
+m_UseWeakInpEqAssump(inputParser.getBoolCmdOption("/alg/iter/use_weak_input_eq_assump", true)),
+m_UseDRMSApprxGen(inputParser.getBoolCmdOption("/alg/blocking/dual_rail/use_drms_apprx_gen", false))
 {
     if (m_UseIpaisrAsPrimary)
     {
@@ -57,7 +59,14 @@ void BoolMatchAlgIterDREnc::FindAllMatchesUnderOutputAssert()
             AIGLIT srcLit = m_SrcInputs[GetAbsRealIndex(match.first)];
             AIGLIT trgLit = m_TrgInputs[GetAbsRealIndex(match.second)];
 
-			assump.push_back(m_Solver->GetInputEqAssmp(srcLit, trgLit, isMatchPos));
+            if (m_UseWeakInpEqAssump)
+            {
+                assump.push_back(m_Solver->GetInputWeakEqAssmp(srcLit, trgLit, isMatchPos));
+            }
+            else
+            {
+			    assump.push_back(m_Solver->GetInputEqAssmp(srcLit, trgLit, isMatchPos));
+            }
 		}
 
 		return assump;
@@ -89,6 +98,25 @@ void BoolMatchAlgIterDREnc::FindAllMatchesUnderOutputAssert()
 			throw runtime_error("Solver return err status");
 		}
 	};
+
+    // boost score and fix polarity for the inputs to get as many DC as possible
+    // NOTE: this is not MaxSAT, we use approximations
+    // also, the solver should support the fix polarity and boost score (currently only Intel SAT solver)
+    if (m_UseDRMSApprxGen)
+    {
+        // fix the polarity for the inputs and boost its score for both src and trg
+        for (const AIGLIT& lit : m_SrcInputs)
+        {
+            m_Solver->FixInputPolarity(lit, true, TVal::DontCare);
+            m_Solver->BoostInputScore(lit, true);
+        }
+
+        for (const AIGLIT& lit : m_TrgInputs)
+        {
+            m_Solver->FixInputPolarity(lit, false, TVal::DontCare);
+            m_Solver->BoostInputScore(lit, false);
+        }
+    }
 
     // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfMatch = 0;
@@ -124,6 +152,7 @@ void BoolMatchAlgIterDREnc::FindAllMatchesUnderOutputAssert()
             
             // PrintModel(srcAssg);
             // PrintModel(trgAssg);
+            // cout << "******************" << endl;
 
             clock_t beforeGen = clock();
             pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> srcAndTrgGen = GeneralizeModel(srcAssg, trgAssg);
@@ -133,8 +162,8 @@ void BoolMatchAlgIterDREnc::FindAllMatchesUnderOutputAssert()
             m_TimeOnGeneralization += genTime;
 
             // cout << "c After generalization" << endl;
-            // PrintModel(srcGenAssignment);
-            // PrintModel(trgGenAssignment);
+            // PrintModel(srcAndTrgGen.first);
+            // PrintModel(srcAndTrgGen.second);
 
             m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAndTrgGen.first, true), InputAssg2Indx(srcAndTrgGen.second, false));
         }

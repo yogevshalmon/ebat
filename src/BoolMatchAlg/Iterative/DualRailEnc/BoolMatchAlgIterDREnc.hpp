@@ -25,6 +25,12 @@ class BoolMatchAlgIterDREnc : public BoolMatchAlgIterBase
         const bool m_UseIpaisrAsPrimary;
         const bool m_UseIpaisrAsDual;
 
+        // if to use weak input equal assumption
+        const bool m_UseWeakInpEqAssump;
+
+        // if toy use dual-rail maxsat approach for inital generalization from the solver
+        const bool m_UseDRMSApprxGen;
+
         // TODO - add additonal params for the DRMS approch for inital generalization
 
         // *** Variables ***
