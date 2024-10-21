@@ -68,12 +68,12 @@ SOLVER_RET_STATUS BoolMatchSolverTopor::SolveUnderAssump(const std::vector<SATLI
     return SolveUnderAssump(assmpCopy);
 }
 
-void BoolMatchSolverTopor::FixPolarity(SATLIT lit)
+void BoolMatchSolverTopor::_FixPolarity(SATLIT lit)
 {
     m_ToporSolver->FixPolarity(lit);
 }
 
-void BoolMatchSolverTopor::BoostScore(SATLIT lit)
+void BoolMatchSolverTopor::_BoostScore(SATLIT lit)
 {
     m_ToporSolver->BoostScore(lit);
 }

@@ -119,6 +119,29 @@ SATLIT BoolMatchSolverBase::IsNotEqualDR(const DRVAR& l1, const DRVAR& l2)
     return IsEqualDR(l1, NegateDRVar(l2));
 }
 
+SATLIT BoolMatchSolverBase::IsWeakEqualDR(const DRVAR& l1, const DRVAR& l2)
+{
+    SATLIT resVar = GetNewVar();
+
+    SATLIT OutTrueTrue = GetNewVar();
+    WriteAnd(OutTrueTrue, GetPos(l1), GetPos(l2));
+    SATLIT OutFalseFalse = GetNewVar();
+    WriteAnd(OutFalseFalse, GetNeg(l1), GetNeg(l2));
+    SATLIT OutDcDc = GetNewVar();
+    WriteAnd(OutDcDc, {NegateSATLit(GetPos(l1)), NegateSATLit(GetNeg(l1)), NegateSATLit(GetPos(l2)), NegateSATLit(GetNeg(l2))});
+    // model that either the values are 1,1 or 0,0 or X,X
+    WriteOr(resVar, {OutTrueTrue, OutFalseFalse, OutDcDc});
+    
+    return resVar;
+}
+
+SATLIT BoolMatchSolverBase::IsWeakNotEqualDR(const DRVAR& l1, const DRVAR& l2)
+{
+    // NOTE: we can not negate the returned SATLIT since it may not indicate it is actually not equal
+    // since the result of (1,x) will be 0 and we do not want to return 1, since 1!=X = X
+    return IsWeakEqualDR(l1, NegateDRVar(l2));
+}
+
 SATLIT BoolMatchSolverBase::GetNewVar()
 {
     // update and return the next available SAT lit
@@ -129,6 +152,71 @@ void BoolMatchSolverBase::HandleNewSATLit(SATLIT lit)
 {
     // update the max var
     m_MaxVar = max(m_MaxVar, abs(lit));
+}
+
+void BoolMatchSolverBase::FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val)
+{
+    switch (m_CirEncoding)
+    {
+        case TSEITIN_ENC:
+        {
+            // we can not fix the polarity of the input to Dont care value in tseitin encoding
+            assert(val != TVal::DontCare);
+            SATLIT satLit = AIGLitToSATLit(lit, isSrc ? 0 : m_TargetSATLitOffset);
+            _FixPolarity(satLit);
+        break;
+        }
+        case DUALRAIL_ENC:
+        {
+            DRVAR dvar = AIGLitToDR(lit, isSrc ? 0 : m_TargetSATLitOffset);
+            SATLIT posLit = GetPos(dvar);
+            SATLIT negLit = GetNeg(dvar);
+            if (val == TVal::DontCare)
+            {
+                _FixPolarity(NegateSATLit(posLit));
+                _FixPolarity(NegateSATLit(negLit));
+            }
+            else if (val == TVal::True)
+            {
+                _FixPolarity(posLit);
+            }
+            else
+            {
+                _FixPolarity(negLit);
+            }
+        break;
+        }
+        default:
+        {
+            throw runtime_error("Unkown circuit encoding");
+        break;
+        }
+    }
+}
+
+void BoolMatchSolverBase::BoostInputScore(AIGLIT lit, bool isSrc)
+{
+    switch (m_CirEncoding)
+    {
+        case TSEITIN_ENC:
+        {
+            SATLIT satLit = AIGLitToSATLit(lit, isSrc ? 0 : m_TargetSATLitOffset);
+            _BoostScore(AbsSATLit(satLit));
+        break;
+        }
+        case DUALRAIL_ENC:
+        {
+            DRVAR dvar = AIGLitToDR(lit, isSrc ? 0 : m_TargetSATLitOffset);
+            _BoostScore(AbsSATLit(GetPos(dvar)));
+            _BoostScore(AbsSATLit(GetNeg(dvar)));
+        break;
+        }
+        default:
+        {
+            throw runtime_error("Unkown circuit encoding");
+        break;
+        }
+    }
 }
 
 const CirEncoding& BoolMatchSolverBase::GetEnc() const
@@ -283,6 +371,44 @@ SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, 
         break;
         }
     }
+
+    return res;
+}
+
+SATLIT BoolMatchSolverBase::GetInputWeakEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, bool isEq, bool useVeryWeakEq)
+{
+    assert(m_IsSolverInitFromAIG);
+    // assert that we are in dr encoding
+    assert(m_CirEncoding == DUALRAIL_ENC);
+
+    if (m_CheckExistInputEqualAssmp)
+    {
+        auto it = m_InputEqAssmpMap.find(make_pair(srcAIGLit, isEq ? trgAIGLit : NegateAIGLit(trgAIGLit)));
+        if (it != m_InputEqAssmpMap.end())
+        {
+            return it->second;
+        }
+    }
+
+    DRVAR srcVar = AIGLitToDR(srcAIGLit, 0);
+    DRVAR trgVar = AIGLitToDR(trgAIGLit, m_TargetSATLitOffset);
+
+    SATLIT res = isEq ? IsWeakEqualDR(srcVar, trgVar) : IsWeakNotEqualDR(srcVar, trgVar);
+
+    if (m_CheckExistInputEqualAssmp)
+    {
+        if (isEq)
+        {
+            m_InputEqAssmpMap[make_pair(srcAIGLit, trgAIGLit)] = res;
+            m_InputEqAssmpMap[make_pair(NegateAIGLit(srcAIGLit), NegateAIGLit(trgAIGLit))] = res;
+        }
+        else
+        {
+            m_InputEqAssmpMap[make_pair(NegateAIGLit(srcAIGLit), trgAIGLit)] = res;
+            m_InputEqAssmpMap[make_pair(srcAIGLit, NegateAIGLit(trgAIGLit))] = res;
+        }  
+    }
+  
 
     return res;
 }
@@ -619,6 +745,29 @@ void BoolMatchSolverBase::WriteAnd(SATLIT l, SATLIT r1, SATLIT r2)
 void BoolMatchSolverBase::WriteOr(SATLIT l, SATLIT r1, SATLIT r2)
 {
     WriteAnd(NegateSATLit(l), NegateSATLit(r1), NegateSATLit(r2));
+}
+
+void BoolMatchSolverBase::WriteAnd(SATLIT l, const vector<SATLIT>& r)
+{
+    vector<SATLIT> cls;
+    cls.push_back(l);
+    for (SATLIT lit : r)
+    {
+        cls.push_back(NegateSATLit(lit));
+    }
+    AddClause(cls);
+    for (SATLIT lit : r)
+    {
+        AddClause({NegateSATLit(l), lit});
+    }
+}
+
+void BoolMatchSolverBase::WriteOr(SATLIT l, const vector<SATLIT>& r)
+{
+    // just use the WriteAnd with the negated values
+    vector<SATLIT> negR = r;
+    transform(r.begin(), r.end(), negR.begin(), [](SATLIT lit) { return NegateSATLit(lit); });
+    WriteAnd(NegateSATLit(l), negR);
 }
 
 void BoolMatchSolverBase::HandleAndGate(const AigAndGate& gate, bool isSrcGate)

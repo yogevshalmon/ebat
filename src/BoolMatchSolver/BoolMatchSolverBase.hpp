@@ -79,6 +79,20 @@ public:
     // X!=X = X
     SATLIT IsNotEqualDR(const DRVAR& l1, const DRVAR& l2);
 
+    // a special eq function used for assuming input match where
+    // X==1 = X
+    // X==0 = X
+    // X==X = 1
+    SATLIT IsWeakEqualDR(const DRVAR& l1, const DRVAR& l2);
+
+    // a special not eq function used for assuming input match where
+    // X!=1 = X
+    // X!=0 = X
+    // X!=X = 1
+    SATLIT IsWeakNotEqualDR(const DRVAR& l1, const DRVAR& l2);
+
+    // TODO add VeryWeakEqualDR and VeryWeakNotEqualDR
+
     // return the next available SAT lit
     SATLIT GetNewVar();
 
@@ -111,17 +125,9 @@ public:
         throw std::runtime_error("Function not implemented");
     }
 
-    // Note: does not work for ipasir solvers
-    virtual void FixPolarity(SATLIT lit)
-    {
-        throw std::runtime_error("Function not implemented");
-    }
+    void FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val);
 
-    // Note: does not work for ipasir solvers
-    virtual void BoostScore(SATLIT lit)
-    {
-        throw std::runtime_error("Function not implemented");
-    }
+    void BoostInputScore(AIGLIT lit, bool isSrc);
 
     // get the circuit encoding for the current solver
     const CirEncoding& GetEnc() const;
@@ -133,6 +139,8 @@ public:
     }
 
     SATLIT GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, bool isEq);
+
+    SATLIT GetInputWeakEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, bool isEq, bool useVeryWeakEq = false);
 
     // value from AIG index, used only on the circuit inputs
     TVal GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const;
@@ -173,11 +181,31 @@ protected:
     // write the and operation l = r1 | r2
     void WriteOr(SATLIT l, SATLIT r1, SATLIT r2);
 
+    // write and of the form l = r1 & r2 & r3 & ...
+    void WriteAnd(SATLIT l, const std::vector<SATLIT>& r);
+
+    // write or of the form l = r1 | r2 | r3 | ...
+    void WriteOr(SATLIT l, const std::vector<SATLIT>& r);
+
     // handle the and gate, write the correspond clauses
     // isSrcGate - if the gate is from the source circuit or the target circuit
     void HandleAndGate(const AigAndGate& gate, bool isSrcGate);
 
     void HandleOutPutAssert(AIGLIT outLit);
+
+    // implement in the derived class, fix polarity for specific lit
+    // Note: does not work for ipasir solvers
+    virtual void _FixPolarity(SATLIT lit)
+    {
+        throw std::runtime_error("Function not implemented");
+    }
+
+    // implement in the derived class, boost for specific lit
+    // Note: does not work for ipasir solvers
+    virtual void _BoostScore(SATLIT lit)
+    {
+        throw std::runtime_error("Function not implemented");
+    }
     
     // *** Params ***
 

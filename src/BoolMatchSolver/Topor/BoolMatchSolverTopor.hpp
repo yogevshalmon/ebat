@@ -32,11 +32,6 @@ class BoolMatchSolverTopor : public BoolMatchSolverBase
         // return ipasir status
         virtual SOLVER_RET_STATUS SolveUnderAssump(const std::vector<SATLIT>& assmp);
 
-        // fix ploratiy of lit
-        virtual void FixPolarity(SATLIT lit);
-        // boost score of lit
-        virtual void BoostScore(SATLIT lit);
-
         // check if the sat lit is satisfied, must work at any solver
         virtual bool IsSATLitSatisfied(SATLIT lit) const;
 
@@ -44,6 +39,11 @@ class BoolMatchSolverTopor : public BoolMatchSolverBase
 
         // check if assumption at pos is required
         virtual bool IsAssumptionRequired(size_t pos);
+
+        // fix ploratiy of lit
+        virtual void _FixPolarity(SATLIT lit);
+        // boost score of lit
+        virtual void _BoostScore(SATLIT lit);
         
         // *** Params ***
 
