@@ -139,7 +139,6 @@ const CirEncoding& BoolMatchSolverBase::GetEnc() const
 void BoolMatchSolverBase::InitializeSolverFromAIG(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser)
 {
     // update the offset for the target circuit
-    // TODO add +1?
     m_TargetSATLitOffset = (unsigned)srcAigeParser.GetMaxIndex();
     // check that the offset is valid
     assert(m_TargetSATLitOffset > 0);
@@ -203,10 +202,32 @@ SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, 
     if (m_CheckExistInputEqualAssmp)
     {
         // check if we saved the eq assump for the two lits
-        auto it = m_InputEqAssmpMap.find(make_pair(srcAIGLit, trgAIGLit));
-        if (it != m_InputEqAssmpMap.end())
+        
+        switch (m_CirEncoding)
         {
-            return isEq ? it->second : NegateSATLit(it->second);
+            case TSEITIN_ENC:
+            {
+                auto it = m_InputEqAssmpMap.find(make_pair(srcAIGLit, trgAIGLit));
+                if (it != m_InputEqAssmpMap.end())
+                {
+                    return isEq ? it->second : NegateSATLit(it->second);
+                }
+            break;
+            }
+            case DUALRAIL_ENC:
+            {
+                auto it = m_InputEqAssmpMap.find(make_pair(srcAIGLit, isEq ? trgAIGLit : NegateAIGLit(trgAIGLit)));
+                if (it != m_InputEqAssmpMap.end())
+                {
+                    return it->second;
+                }
+            break;
+            }
+            default:
+            {
+                throw runtime_error("Unkown circuit encoding");
+            break;
+            }
         }
     }
 
@@ -240,8 +261,19 @@ SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, 
 
             res = isEq ? IsEqualDR(srcVar, trgVar) : IsNotEqualDR(srcVar, trgVar);
 
-            // TODO save the eq assump for the two lits NOTE!!!! not as simple as in tsietin
-
+            if (m_CheckExistInputEqualAssmp)
+            {
+                if (isEq)
+                {
+                    m_InputEqAssmpMap[make_pair(srcAIGLit, trgAIGLit)] = res;
+                    m_InputEqAssmpMap[make_pair(NegateAIGLit(srcAIGLit), NegateAIGLit(trgAIGLit))] = res;
+                }
+                else
+                {
+                    m_InputEqAssmpMap[make_pair(NegateAIGLit(srcAIGLit), trgAIGLit)] = res;
+                    m_InputEqAssmpMap[make_pair(srcAIGLit, NegateAIGLit(trgAIGLit))] = res;
+                }  
+            }
         break;
         }
         default:
