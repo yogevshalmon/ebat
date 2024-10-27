@@ -108,6 +108,18 @@ int main(int argc, char **argv)
                 return -1;
             }
         }
+        else if (alg == "block")
+        {
+            if (blockingEnc == "tseitin")
+            {
+                boolMatchAlg = new BoolMatchAlgBlockTseitinEnc(cmdInput);
+            }
+            else
+            {
+                throw runtime_error("unkown blocking enc type provided");
+                return -1;
+            }
+        }
         else
         {
             throw runtime_error("unkown algorithm type provided");
