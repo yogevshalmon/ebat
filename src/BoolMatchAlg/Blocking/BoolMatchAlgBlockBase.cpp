@@ -58,7 +58,7 @@ void BoolMatchAlgBlockBase::_InitializeFromAIGs()
     vector<SATLIT> trgInputs = m_Solver->GetLitsFromAIGInputs(m_TrgInputs, false);
 
     // TODO: edit the params here for the matrix
-    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_Solver, srcInputs, trgInputs, BoolMatchBlockType::DYNAMIC_BLOCK, true, initMatch, false);
+    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_Solver, srcInputs, trgInputs, BoolMatchBlockType::DYNAMIC_BLOCK, m_AllowInputNegMap, initMatch, false);
 }
 
 
