@@ -6,7 +6,7 @@ BoolMatchAlgIterDREnc::BoolMatchAlgIterDREnc(const InputParser& inputParser):
 BoolMatchAlgIterBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_plain", false)),
 m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_dual", true)),
-m_UseDRMSApprxGen(inputParser.getBoolCmdOption("/alg/blocking/dual_rail/use_drms_apprx_gen", false)),
+m_UseDRMSApprxGen(inputParser.getBoolCmdOption("/alg/iter/dual_rail/use_drms_apprx_gen", false)),
 m_UseWeakInpEqAssump(inputParser.getBoolCmdOption("/alg/iter/use_weak_input_eq_assump", true))
 {
     if (m_UseIpaisrAsPrimary)
