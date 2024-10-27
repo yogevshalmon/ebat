@@ -145,6 +145,10 @@ public:
     // value from AIG index, used only on the circuit inputs
     TVal GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) const;
 
+    // get the SAT lit from the AIG lits for the circuit inputs
+    // NOTE: currently only work for the tseitin encoding
+    std::vector<SATLIT> GetLitsFromAIGInputs(const std::vector<AIGLIT>& aigLits, bool isLitFromSrc) const;
+
     // used for getting assigment from solver for the circuit inputs
     INPUT_ASSIGNMENT GetAssignmentForAIGLits(const std::vector<AIGLIT>& aigLits, bool isLitFromSrc) const;
 

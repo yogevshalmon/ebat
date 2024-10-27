@@ -466,6 +466,21 @@ TVal BoolMatchSolverBase::GetTValFromAIGLit(AIGLIT aigLit, bool isLitFromSrc) co
     return val;
 }
 
+vector<SATLIT> BoolMatchSolverBase::GetLitsFromAIGInputs(const vector<AIGLIT>& aigLits, bool isLitFromSrc) const
+{
+    assert(m_IsSolverInitFromAIG);
+    assert(m_CirEncoding == TSEITIN_ENC);
+
+    vector<SATLIT> lits(aigLits.size());
+
+    transform(aigLits.begin(), aigLits.end(), lits.begin(), [&](AIGLIT aigLit) -> SATLIT
+    {
+        return AIGLitToSATLit(aigLit, isLitFromSrc ? 0 : m_TargetSATLitOffset);
+    });
+
+    return lits;
+}
+
 // used for getting assigment from solver for the circuit inputs
 INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLIT>& aigLits, bool isLitFromSrc) const
 {
