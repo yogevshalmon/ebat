@@ -11,6 +11,10 @@ m_UseMatchSelector(useMatchSelector),
 m_NegMapIsAllowed(allowNegMap),
 m_Solver(solver),
 m_InputSize(inputSize),
+m_DataMatchMatrix(nullptr),
+m_MatchSelector(CONST_LIT_TRUE),
+m_NumOfBlockedClsMatches(0),
+m_LastMaxVal(0),
 m_TimeOnNextMatch(0),
 m_TimeOnEliminateMatch(0),
 m_TimeOnEnforceMatch(0),
@@ -22,6 +26,7 @@ m_TimeOnBlockMatchesByInputsVal(0)
         m_DataMatchMatrix[i] = {m_Solver->GetNewVar(), m_Solver->GetNewVar()};
     }
 
+	// NOTE: if match selector is not intilize then we will use the const true
     if (m_UseMatchSelector)
     {
         m_MatchSelector = m_Solver->GetNewVar();
