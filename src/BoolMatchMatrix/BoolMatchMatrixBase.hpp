@@ -28,8 +28,19 @@ public:
     // allowNegMap - if to allow to find new neg map (not included given indexMapping)
     // indexMapping is optional (can be empty) the given mapping to assert
     // useMatchSelector - if to allow a reset for the eliminated macthes, by using extra varibale for all clauses
-    BoolMatchMatrixBase(BoolMatchSolverBase* m_Solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+    BoolMatchMatrixBase(BoolMatchSolverBase* solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
         bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector);
+
+
+    // initialize BoolMatchMatrixBase with the solver and the previously created inputs to both src and trg circuits
+    // where each matrix index will imply a match between the src and trg inputs (combining the matrix and the mitter instance)
+    // blockMatchTypeWithInputsVal - the type of the block when using the inputs values for blocking matches
+    // allowNegMap - if to allow to find new neg map (not included given indexMapping)
+    // indexMapping is optional (can be empty) the given mapping to assert
+    // useMatchSelector - if to allow a reset for the eliminated macthes, by using extra varibale for all clauses
+    BoolMatchMatrixBase(BoolMatchSolverBase* solver, std::vector<SATLIT> srcInputs, std::vector<SATLIT> trgInputs, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+        bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector);
+
 
     virtual ~BoolMatchMatrixBase();
 

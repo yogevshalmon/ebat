@@ -28,6 +28,32 @@ m_TimeOnBlockMatchesByInputsVal(0)
     }
 }
 
+BoolMatchMatrixBase::BoolMatchMatrixBase(BoolMatchSolverBase* solver, vector<SATLIT> srcInputs, vector<SATLIT> trgInputs, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+        bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector):
+m_BlockMatchTypeWithInputsVal(blockMatchTypeWithInputsVal),
+m_UseMatchSelector(useMatchSelector),
+m_NegMapIsAllowed(allowNegMap),
+m_Solver(solver),
+m_InputSize(srcInputs.size()),
+m_TimeOnNextMatch(0),
+m_TimeOnEliminateMatch(0),
+m_TimeOnEnforceMatch(0),
+m_TimeOnBlockMatchesByInputsVal(0)
+{
+	// check if the inputs size are the same and not empty
+	assert(!srcInputs.empty() && !trgInputs.empty());
+	assert(srcInputs.size() == trgInputs.size());
+
+	// create a new matrix but do not initialize it since we will use the given inputs
+	// the derived classes will initialize the matrix
+	m_DataMatchMatrix = new MatrixIndexVars[GerMatrixSize()];
+
+	if (m_UseMatchSelector)
+    {
+        m_MatchSelector = m_Solver->GetNewVar();
+    }
+}
+
 BoolMatchMatrixBase::~BoolMatchMatrixBase()
 {
     delete[] m_DataMatchMatrix;

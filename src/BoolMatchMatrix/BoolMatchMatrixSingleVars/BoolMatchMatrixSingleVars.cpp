@@ -10,6 +10,40 @@ BoolMatchMatrixBase(solver, inputSize, blockMatchTypeWithInputsVal, allowNegMap,
     AssertRowAndCol(indexMapping);
 }
 
+BoolMatchMatrixSingleVars::BoolMatchMatrixSingleVars(BoolMatchSolverBase* solver, vector<SATLIT> srcInputs, vector<SATLIT> trgInputs, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+        bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector):
+BoolMatchMatrixBase(solver, srcInputs, trgInputs, blockMatchTypeWithInputsVal, allowNegMap, indexMapping, useMatchSelector)
+{
+	// create a matrix index vars with the given inputs (SATLIT)
+	auto CreateMatrixIndexVars = [&](const SATLIT srcInp, const SATLIT trgInp) -> MatrixIndexVars
+	{
+		SATLIT isMatchPosVar = m_Solver->GetNewVar();
+		SATLIT isMatchNegVar = m_Solver->GetNewVar();
+		// match pos -> assert no 0,1 or 1,0
+		m_Solver->AddClause({ ~isMatchPosVar, srcInp, ~trgInp });
+		m_Solver->AddClause({ ~isMatchPosVar, ~srcInp, trgInp});
+		// match neg -> assert no 0,0 or 1,1
+		m_Solver->AddClause({ ~isMatchNegVar, srcInp, trgInp });
+		m_Solver->AddClause({ ~isMatchNegVar, ~srcInp, ~trgInp });
+		return {isMatchPosVar, isMatchNegVar};
+	};
+
+	// create match index from first depth
+	size_t index = 0;
+	for (const SATLIT srcInp : srcInputs)
+	{
+		for (const SATLIT trgInp : trgInputs)
+		{
+			// TODO fix warning
+			m_DataMatchMatrix[index] = CreateMatrixIndexVars(srcInp, trgInp);
+			index++;
+		}
+	}
+
+    // assert the row and col
+    AssertRowAndCol(indexMapping);
+}
+
 MatrixIndexVecMatch BoolMatchMatrixSingleVars::GetCurrMatch() const
 {
     MatrixIndexVecMatch currMatch(GetMatrixColRowSize());

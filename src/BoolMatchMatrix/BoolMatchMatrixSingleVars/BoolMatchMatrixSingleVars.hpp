@@ -9,7 +9,12 @@ class BoolMatchMatrixSingleVars : virtual public BoolMatchMatrixBase
 public:
     // initialize the class
     // call the base class constructor
-    BoolMatchMatrixSingleVars(BoolMatchSolverBase* m_Solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+    BoolMatchMatrixSingleVars(BoolMatchSolverBase* solver, unsigned inputSize, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
+        bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector);
+
+    // initialize the class witht the circuits inputs
+    // call the base class constructor
+    BoolMatchMatrixSingleVars(BoolMatchSolverBase* solver, std::vector<SATLIT> srcInputs, std::vector<SATLIT> trgInputs, const BoolMatchBlockType& blockMatchTypeWithInputsVal,
         bool allowNegMap, const MatrixIndexVecMatch& indexMapping, bool useMatchSelector);
 
     // get the current match 
