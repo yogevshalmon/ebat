@@ -61,12 +61,16 @@ class BoolMatchAlgBase
 
         // *** Params ***
 
+        // the given input parser
+        const InputParser m_InputParser;
         // if to print the enumerated matches
         const bool m_PrintMatches;
         // if timeout was given
         const bool m_UseTimeOut;
         // timeout
         const double m_TimeOut;
+        // if to allow negated map to the inputs
+        const bool m_AllowInputNegMap;
 		
         // *** Variables ***
         

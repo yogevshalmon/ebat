@@ -8,12 +8,15 @@ using namespace lorina;
 
 
 BoolMatchAlgBase::BoolMatchAlgBase(const InputParser& inputParser):
+m_InputParser(inputParser),
 // default is not printing
 m_PrintMatches(inputParser.getBoolCmdOption("/general/print_matches", true)),
 // if timeout was given
 m_UseTimeOut(inputParser.cmdOptionExists("/general/timeout")),
 // check if timeout is given in command
 m_TimeOut(inputParser.getUintCmdOption("/general/timeout", DEF_TIMEOUT)),
+// *** alg related params ***
+m_AllowInputNegMap(inputParser.getBoolCmdOption("/alg/allow_input_neg_map", false)),
 m_IsInit(false),
 m_IsTimeOut(false), 
 m_TimeOnGeneralization(0),
