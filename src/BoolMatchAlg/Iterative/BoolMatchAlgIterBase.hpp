@@ -6,8 +6,8 @@
 #include "CirSimulation/CirSim.hpp"
 
 /*
-    Solver for boolean matching base on the iteration algorithm
-    meaning we have bool match solver and an bool match matrix and we iterate over the matrix
+    Solver for boolean matching base on the blocking algorithm
+    meaning we have bool match solver (mitter) and an bool match matrix and we iterate over the matrix
 */
 class BoolMatchAlgIterBase : public BoolMatchAlgBase
 {
