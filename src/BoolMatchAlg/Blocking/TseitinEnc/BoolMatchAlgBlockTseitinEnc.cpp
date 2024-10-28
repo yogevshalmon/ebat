@@ -91,13 +91,13 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
         numOfNonValidMatch++;
         m_TotalNumberOfMatches++;
 
-        // print the counter example
-        cout << "c Found Invalid Match" << endl;
+        
         INPUT_ASSIGNMENT srcAssg = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
         INPUT_ASSIGNMENT trgAssg = m_Solver->GetAssignmentForAIGLits(m_TrgInputs, false);
         
-        PrintModel(srcAssg);
-        PrintModel(trgAssg);
+        // cout << "c Found Invalid Match" << endl;
+        // PrintModel(srcAssg);
+        // PrintModel(trgAssg);
 
         clock_t beforeGen = clock();
         pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> srcAndTrgGen = GeneralizeModel(srcAssg, trgAssg);
@@ -106,10 +106,38 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         m_TimeOnGeneralization += genTime;
 
-        cout << "c After generalization" << endl;
-        PrintModel(srcAndTrgGen.first);
-        PrintModel(srcAndTrgGen.second);
+        // cout << "c After generalization" << endl;
+        // PrintModel(srcAndTrgGen.first);
+        // PrintModel(srcAndTrgGen.second);
 
         m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAndTrgGen.first, true), InputAssg2Indx(srcAndTrgGen.second, false), &onlyValidMatchMatrix);
+    }
+
+    cout << "c Finished blocking " << numOfNonValidMatch << " non-valid matches" << endl;
+
+    SOLVER_RET_STATUS nextValidMatchStatus = onlyValidMatchMatrix.FindNextMatch();
+    while (nextValidMatchStatus == SAT_RET_STATUS)
+    {
+        m_TotalNumberOfMatches++;
+        m_NumberOfValidMatches++;
+
+        MatrixIndexVecMatch currMatch = onlyValidMatchMatrix.GetCurrMatch();
+
+        // cout << "c Match is valid" << endl;
+        // for (const MatrixIndexMatch& match : currMatch)
+        // {
+        //     cout << "c " << match.first << " -> " << match.second << endl;
+        // }
+
+        onlyValidMatchMatrix.EliminateMatch(currMatch);
+
+        nextValidMatchStatus = onlyValidMatchMatrix.FindNextMatch();
+    }
+
+    // check for timeout
+    if (nextValidMatchStatus == TIMEOUT_RET_STATUS)
+    {
+        m_IsTimeOut = true;
+		throw runtime_error("Timeout reached");
     }
 }
