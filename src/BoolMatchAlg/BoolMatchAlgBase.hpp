@@ -54,6 +54,9 @@ class BoolMatchAlgBase
         // print value of a single AIG lit
         void PrintLitVal(const AIGLIT lit, const TVal& currVal);
 
+        // print the index match as AIG match
+        void PrintMatrixIndexMatchAsAIG(const MatrixIndexVecMatch& fullMatch) const;
+
         unsigned GetNumOfDCFromInputAssignment(const INPUT_ASSIGNMENT& assignment) const;
 
         // convert INPUT_ASSIGNMENT to MULT_INDX_ASSIGNMENT

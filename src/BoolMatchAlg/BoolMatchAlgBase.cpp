@@ -10,7 +10,7 @@ using namespace lorina;
 BoolMatchAlgBase::BoolMatchAlgBase(const InputParser& inputParser):
 m_InputParser(inputParser),
 // default is not printing
-m_PrintMatches(inputParser.getBoolCmdOption("/general/print_matches", true)),
+m_PrintMatches(inputParser.getBoolCmdOption("/general/print_matches", false)),
 // if timeout was given
 m_UseTimeOut(inputParser.cmdOptionExists("/general/timeout")),
 // check if timeout is given in command
@@ -208,6 +208,30 @@ void BoolMatchAlgBase::PrintModel(const INPUT_ASSIGNMENT& model)
     cout << endl;
 }
 
+void BoolMatchAlgBase::PrintMatrixIndexMatchAsAIG(const MatrixIndexVecMatch& fullMatch) const
+{
+    for (size_t i = 0; i < fullMatch.size(); i++)
+    {
+        const MatrixIndexMatch& singleIndexMatch = fullMatch[i];
+        AIGLIT currMatchSrcLit = m_SrcInputs[(GetAbsRealIndex(singleIndexMatch.first))];
+        AIGLIT currMatchTrgLit = m_TrgInputs[(GetAbsRealIndex(singleIndexMatch.second))];
+
+        if (IsMatchPos(singleIndexMatch))
+        {
+            cout << "{" << currMatchSrcLit << " " << currMatchTrgLit << "}";
+        }
+        else
+        {
+            cout << "{" << currMatchSrcLit << " !" << currMatchTrgLit << "}";
+        }
+
+        if (i != fullMatch.size() - 1)
+        {
+            cout << " ";
+        }
+    }
+    cout << endl;
+}
 
 unsigned BoolMatchAlgBase::GetNumOfDCFromInputAssignment(const INPUT_ASSIGNMENT& assignment) const
 {

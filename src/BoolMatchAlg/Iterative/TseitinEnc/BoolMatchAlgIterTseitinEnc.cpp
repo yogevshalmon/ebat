@@ -107,11 +107,10 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 		{
             m_NumberOfValidMatches++;
 
-            // cout << "c Match is valid" << endl;
-            // for (const MatrixIndexMatch& match : currMatch)
-            // {
-            //     cout << "c " << match.first << " -> " << match.second << endl;
-            // }
+            if (m_PrintMatches)
+            {
+                PrintMatrixIndexMatchAsAIG(currMatch);
+            }
 
             m_InputMatchMatrix->EliminateMatch(currMatch);
         }
