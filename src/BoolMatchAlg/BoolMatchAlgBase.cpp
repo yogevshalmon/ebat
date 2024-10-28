@@ -48,7 +48,15 @@ void BoolMatchAlgBase::PrintInitialInformation()
     if (m_UseTimeOut)
     {
         cout << "c Timeout: " << m_TimeOut << " seconds" << endl;
-    }  
+    }
+    if (m_AllowInputNegMap)
+    {
+        cout << "c Allow negated map to the inputs" << endl;
+    }
+    else
+    {
+        cout << "c Do not allow negated map to the inputs" << endl;
+    }
 }
 
 
