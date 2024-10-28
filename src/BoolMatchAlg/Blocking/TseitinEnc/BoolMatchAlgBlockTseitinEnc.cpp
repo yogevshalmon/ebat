@@ -92,7 +92,7 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
         m_TotalNumberOfMatches++;
 
         // print the counter example
-        cout << "c Found Invalud Match" << endl;
+        cout << "c Found Invalid Match" << endl;
         INPUT_ASSIGNMENT srcAssg = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
         INPUT_ASSIGNMENT trgAssg = m_Solver->GetAssignmentForAIGLits(m_TrgInputs, false);
         
