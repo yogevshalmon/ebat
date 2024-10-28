@@ -52,7 +52,10 @@ void BoolMatchAlgIterBase::_InitializeFromAIGs()
 
     m_Solver->InitializeSolverFromAIG(m_AigParserSrc, m_AigParserTrg);
 
-    if (m_UseDualSolver) m_DualSolver->InitializeSolverFromAIG(m_AigParserSrc, m_AigParserTrg);
+    if (m_UseDualSolver)
+    {
+        m_DualSolver->InitializeSolverFromAIG(m_AigParserSrc, m_AigParserTrg);
+    }
 
     MatrixIndexVecMatch initMatch = {};
     // TODO: edit the params here for the matrix
