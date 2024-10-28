@@ -84,9 +84,8 @@ SATLIT BoolMatchMatrixSingleVars::GetIndexVar(int x, int y) const
 
     // invalid index
 	assert((unsigned)absX > GetMatrixColRowSize() || (unsigned)absY > GetMatrixColRowSize());
-    // matrix index acn not be 0
+    // matrix index can not be 0
     assert(absX != 0 && absY != 0);
-	
 
 	const MatrixIndexVars indexVars =  m_DataMatchMatrix[(absX - 1)*GetMatrixColRowSize() + (absY - 1)];
 	if (IsMatchPos(x,y))
