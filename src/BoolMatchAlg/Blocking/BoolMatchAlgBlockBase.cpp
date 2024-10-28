@@ -94,7 +94,7 @@ void BoolMatchAlgBlockBase::PrintInitialInformation()
 
     if (m_UseCirSim)
     {
-        cout << "c Use Ternary simulation" << endl;
+        cout << "c Use Circuit simulation" << endl;
         if (m_UseTopToBotSim)
         {
             cout << "c Use Top to Bottom simulation" << endl;
