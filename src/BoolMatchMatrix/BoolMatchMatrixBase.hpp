@@ -194,10 +194,10 @@ protected:
     // *** Additonal help functions for the main BlockMatch functions ***
 
     // create unique combinations by setting vec1 and iterate over all permutations of vec2
-    static std::vector<MatrixIndexVecMatch> AllComb(std::vector<unsigned>& vec1, std::vector<unsigned>& vec2);
+    std::vector<MatrixIndexVecMatch> AllComb(std::vector<unsigned>& vec1, std::vector<unsigned>& vec2);
     // combine two vector of non-allowed match combination and combine them where they each combination should be together
     // this is used when the circuit is unrolled and there are multiple group of different values that need to be handled together
-    static std::vector<MatrixIndexVecMatch> CombineAllComb(std::vector<MatrixIndexVecMatch>& vec1, std::vector<MatrixIndexVecMatch>& vec2);
+    std::vector<MatrixIndexVecMatch> CombineAllComb(std::vector<MatrixIndexVecMatch>& vec1, std::vector<MatrixIndexVecMatch>& vec2);
 
     /**
      * Generates all possible combinations from the given vector.
@@ -233,5 +233,5 @@ protected:
      * @param secondVecIndx The second input assignment.
      * @return A vector of vectors, where each inner vector represents a combination of `TIndexMatch` values.
      */
-    static std::vector<MatrixIndexVecMatch> AllCombForNeg(const MULT_INDX_ASSIGNMENT& primVecIndx, const MULT_INDX_ASSIGNMENT& secondVecIndx);
+    std::vector<MatrixIndexVecMatch> AllCombForNeg(const MULT_INDX_ASSIGNMENT& primVecIndx, const MULT_INDX_ASSIGNMENT& secondVecIndx);
 };
