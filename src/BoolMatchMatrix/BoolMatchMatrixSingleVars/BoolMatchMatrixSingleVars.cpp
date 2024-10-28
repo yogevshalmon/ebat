@@ -20,11 +20,11 @@ BoolMatchMatrixBase(solver, srcInputs, trgInputs, blockMatchTypeWithInputsVal, a
 		SATLIT isMatchPosVar = m_Solver->GetNewVar();
 		SATLIT isMatchNegVar = m_Solver->GetNewVar();
 		// match pos -> assert no 0,1 or 1,0
-		m_Solver->AddClause({ ~isMatchPosVar, srcInp, ~trgInp });
-		m_Solver->AddClause({ ~isMatchPosVar, ~srcInp, trgInp});
+		m_Solver->AddClause({ NegateSATLit(isMatchPosVar), srcInp, NegateSATLit(trgInp) });
+		m_Solver->AddClause({ NegateSATLit(isMatchPosVar), NegateSATLit(srcInp), trgInp});
 		// match neg -> assert no 0,0 or 1,1
-		m_Solver->AddClause({ ~isMatchNegVar, srcInp, trgInp });
-		m_Solver->AddClause({ ~isMatchNegVar, ~srcInp, ~trgInp });
+		m_Solver->AddClause({ NegateSATLit(isMatchNegVar), srcInp, trgInp });
+		m_Solver->AddClause({ NegateSATLit(isMatchNegVar), NegateSATLit(srcInp), NegateSATLit(trgInp)});
 		return {isMatchPosVar, isMatchNegVar};
 	};
 
