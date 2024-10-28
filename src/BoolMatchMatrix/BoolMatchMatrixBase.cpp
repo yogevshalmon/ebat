@@ -191,7 +191,11 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_A
 			{
 				indexPerValue[0].push_back(index);
 			}
-			// if DC do nothing
+			else
+			{
+				// currently we do not allow DC values if we do not allow negated map since it can hinder the blocking logic
+				throw runtime_error("DC value is not allowed in EliminateOrEnforceMatchesByInputsVal");
+			}
 		}
 	};
 
