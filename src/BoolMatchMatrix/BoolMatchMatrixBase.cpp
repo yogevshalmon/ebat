@@ -179,7 +179,9 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_A
 	{
 		for (size_t i = 0; i < values.size(); i++)
 		{
-			unsigned index = values[i].first;
+			// TODO use generic func instead of +1
+			// add + 1 since index start from 1
+			unsigned index = values[i].first + 1;
 			TVal val = values[i].second;
 			if (val == TVal::True)
 			{
