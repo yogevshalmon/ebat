@@ -323,6 +323,7 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_A
 void BoolMatchMatrixBase::EliminateMatchesByInputsValForNeg(const MULT_INDX_ASSIGNMENT& srcValues, const MULT_INDX_ASSIGNMENT& trgValues, 
     BoolMatchMatrixBase* otherMatchData)
 {
+	throw runtime_error("EliminateMatchesByInputsValForNeg is not implemented");
 }
 
 // Enforce matches according to the current values of src and trg
