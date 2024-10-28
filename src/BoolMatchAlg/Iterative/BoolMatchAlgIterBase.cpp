@@ -25,6 +25,13 @@ m_InputMatchMatrix(nullptr),
 m_SrcCirSimulation(nullptr),
 m_TrgCirSimulation(nullptr)
 {
+    // we can not use cir simulation or core generalization if negated map is not allowed
+    // this is because we can have a situation where the we have 00XX -> 11XX (was 0011 -> 1100) and we can not block it under the assumption that no negated map is allowed
+    if (!m_AllowInputNegMap && (m_UseCirSim || m_UseDualSolver))
+    {
+        throw runtime_error("Can not use circuit simulation or UnSAT core generalization if negated map is not allowed");
+    }
+    
     m_InputMatchSolver = new BoolMatchSolverTopor(inputParser, CirEncoding::TSEITIN_ENC, false);
 }
 
