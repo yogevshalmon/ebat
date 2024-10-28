@@ -115,6 +115,11 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
 
     cout << "c Finished blocking " << numOfNonValidMatch << " non-valid matches" << endl;
 
+    if (m_StopAfterBlockingAllNonValidMatches)
+    {
+        return;
+    }
+
     SOLVER_RET_STATUS nextValidMatchStatus = onlyValidMatchMatrix.FindNextMatch();
     while (nextValidMatchStatus == SAT_RET_STATUS)
     {

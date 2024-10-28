@@ -19,6 +19,7 @@ m_UseLitDrop(inputParser.getBoolCmdOption("/alg/block/use_lit_drop", true)),
 m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/block/lit_drop_conflict_limit", 0)),
 // default is false
 m_LitDropChekRecurCore(inputParser.getBoolCmdOption("/alg/block/lit_drop_recur_ucore", false)),
+m_StopAfterBlockingAllNonValidMatches(inputParser.getBoolCmdOption("/alg/block/stop_after_blocking_all_non_valid_matches", false)),
 m_Solver(nullptr), 
 m_DualSolver(nullptr),
 m_InputMatchMatrix(nullptr),
