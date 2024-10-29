@@ -112,6 +112,11 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
                 PrintMatrixIndexMatchAsAIG(currMatch);
             }
 
+            if (m_StopAtFirstValidMatch)
+            {
+                return;
+            }
+
             m_InputMatchMatrix->EliminateMatch(currMatch);
         }
         else

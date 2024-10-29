@@ -74,6 +74,8 @@ class BoolMatchAlgBase
         const double m_TimeOut;
         // if to allow negated map to the inputs
         const bool m_AllowInputNegMap;
+        // if to stop at first valid match
+        const bool m_StopAtFirstValidMatch;
 		
         // *** Variables ***
         

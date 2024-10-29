@@ -17,6 +17,7 @@ m_UseTimeOut(inputParser.cmdOptionExists("/general/timeout")),
 m_TimeOut(inputParser.getUintCmdOption("/general/timeout", DEF_TIMEOUT)),
 // *** alg related params ***
 m_AllowInputNegMap(inputParser.getBoolCmdOption("/alg/allow_input_neg_map", false)),
+m_StopAtFirstValidMatch(inputParser.getBoolCmdOption("/alg/stop_at_first_valid_match", false)),
 m_IsInit(false),
 m_IsTimeOut(false), 
 m_TimeOnGeneralization(0),

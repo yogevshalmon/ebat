@@ -133,6 +133,11 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
             PrintMatrixIndexMatchAsAIG(currMatch);
         }
 
+        if (m_StopAtFirstValidMatch)
+        {
+            return;
+        }
+
         onlyValidMatchMatrix.EliminateMatch(currMatch);
 
         nextValidMatchStatus = onlyValidMatchMatrix.FindNextMatch();
