@@ -83,7 +83,7 @@ SATLIT BoolMatchMatrixSingleVars::GetIndexVar(int x, int y) const
 	int absY = abs(y);
 
     // invalid index
-	assert((unsigned)absX > GetMatrixColRowSize() || (unsigned)absY > GetMatrixColRowSize());
+	assert(!((unsigned)absX > GetMatrixColRowSize() || (unsigned)absY > GetMatrixColRowSize()));
     // matrix index can not be 0
     assert(absX != 0 && absY != 0);
 
