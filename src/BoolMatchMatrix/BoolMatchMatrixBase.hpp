@@ -97,6 +97,10 @@ public:
     // return the number of created blocked clauses to block matches
     unsigned long long GetNumOfBlockedClsMatches() const {return m_NumOfBlockedClsMatches;};
 
+    // get the last max value when calling EliminateOrEnforceMatchesByInputsVal
+    // used to indicate which polarity we want to maximize in the inputs, as we want the largest group of same polarity
+    unsigned GetLastMaxVal() const { return m_LastMaxVal; }
+
     // print the stats of the class
     void PrintStats() const;
 
