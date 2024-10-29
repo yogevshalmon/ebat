@@ -7,7 +7,8 @@ using namespace std;
 BoolMatchAlgBlockTseitinEnc::BoolMatchAlgBlockTseitinEnc(const InputParser& inputParser):
 BoolMatchAlgBlockBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_plain", false)),
-m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_dual", true))
+m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_dual", true)),
+m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/block/use_max_val_apprx_strat", false))
 {
     if (m_UseIpaisrAsPrimary)
     {
@@ -29,6 +30,12 @@ m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_dual",
         {
             m_DualSolver = new BoolMatchSolverTopor(inputParser, CirEncoding::TSEITIN_ENC, true);
         }  
+    }
+
+    // check m_UseMaxValApprxStrat is only use when we do not allow neg map
+    if (m_UseMaxValApprxStrat && m_AllowInputNegMap)
+    {
+        throw runtime_error("Can not use max val approx strat when neg map is allowed");
     }
 }
 
@@ -55,9 +62,34 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
     MatrixIndexVecMatch initMatch = {};
     BoolMatchMatrixSingleVars onlyValidMatchMatrix = BoolMatchMatrixSingleVars(&validMatchSolver, m_InputSize, BoolMatchBlockType::DYNAMIC_BLOCK, m_AllowInputNegMap, initMatch, false);
 
-    auto FindNextNonValidMatch = [&]() -> bool
+    // find the next non valid match
+    // forcePolToVal - if true we force the polarity of the inputs to the value
+    //  used if 
+    auto FindNextNonValidMatch = [&](bool forcePolToVal, unsigned value) -> bool
 	{
 		SOLVER_RET_STATUS res = ERR_RET_STATUS;
+
+        if (forcePolToVal)
+        {
+            // value should be either 0 -or- 1
+            assert(value == 0 || value == 1);
+
+            TVal polVal = value == 0 ? TVal::False : TVal::True;
+
+            // fix the polarity for the inputs for both src and trg
+            // TODO - should we boost the score aswell?
+            for (const AIGLIT& lit : m_SrcInputs)
+            {
+                m_Solver->FixInputPolarity(lit, true, polVal);
+                //m_Solver->BoostInputScore(lit, true);
+            }
+
+            for (const AIGLIT& lit : m_TrgInputs)
+            {
+                m_Solver->FixInputPolarity(lit, false, polVal);
+                //m_Solver->BoostInputScore(lit, false);
+            }
+        }
 
 		res = m_Solver->SolveUnderAssump(assump);
 		
@@ -86,7 +118,9 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
     // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfNonValidMatch = 0;
 
-    while (FindNextNonValidMatch())
+    unsigned lastMaxVal = 0;
+
+    while (FindNextNonValidMatch(m_UseMaxValApprxStrat, lastMaxVal))
     {
         numOfNonValidMatch++;
         m_TotalNumberOfMatches++;
@@ -111,6 +145,12 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
         // PrintModel(srcAndTrgGen.second);
 
         m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAndTrgGen.first, true), InputAssg2Indx(srcAndTrgGen.second, false), &onlyValidMatchMatrix);
+
+        // if m_UseMaxValApprxStrat is not used then we do not actually need this
+        if (m_UseMaxValApprxStrat)
+        {
+            lastMaxVal = m_InputMatchMatrix->GetLastMaxVal();
+        }
     }
 
     cout << "c Finished blocking " << numOfNonValidMatch << " non-valid matches" << endl;
