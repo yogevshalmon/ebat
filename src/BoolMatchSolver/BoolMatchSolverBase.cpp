@@ -226,6 +226,8 @@ const CirEncoding& BoolMatchSolverBase::GetEnc() const
 
 void BoolMatchSolverBase::InitializeSolverFromAIG(const AigerParser& srcAigeParser, const AigerParser& trgAigeParser)
 {
+    m_IsSolverInitFromAIG = true;
+    
     // update the offset for the target circuit
     m_TargetSATLitOffset = (unsigned)srcAigeParser.GetMaxIndex();
     // check that the offset is valid
@@ -279,8 +281,6 @@ void BoolMatchSolverBase::InitializeSolverFromAIG(const AigerParser& srcAigePars
 
     m_SrcOutputLit = srcOutputs[0];
     m_TrgOutputLit = trgOutputs[0];
-
-    m_IsSolverInitFromAIG = true;
 }
 
 SATLIT BoolMatchSolverBase::GetInputEqAssmp(AIGLIT srcAIGLit, AIGLIT trgAIGLit, bool isEq)
