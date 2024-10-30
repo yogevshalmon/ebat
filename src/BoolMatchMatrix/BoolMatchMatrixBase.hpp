@@ -11,6 +11,36 @@ enum class BoolMatchBlockType
     ENFORCE_MATCH,
     DYNAMIC_BLOCK
 };
+
+static const unsigned DEF_BLOCK_MATCH_TYPE_UINT = 2;
+
+// given unsigned convert it to BoolMatchBlockType
+inline BoolMatchBlockType ConvertToBoolMatchBlockType(unsigned value) {
+    switch (value) {
+        case 0:
+            return BoolMatchBlockType::ELIMINATE_MATCH;
+        case 1:
+            return BoolMatchBlockType::ENFORCE_MATCH;
+        case 2:
+            return BoolMatchBlockType::DYNAMIC_BLOCK;
+        default:
+            throw std::invalid_argument("Invalid value for BoolMatchBlockType");
+    }
+}
+
+inline std::string ConvertBoolMatchBlockTypeToString(BoolMatchBlockType blockType) {
+    switch (blockType) {
+        case BoolMatchBlockType::ELIMINATE_MATCH:
+            return "ELIMINATE_MATCH";
+        case BoolMatchBlockType::ENFORCE_MATCH:
+            return "ENFORCE_MATCH";
+        case BoolMatchBlockType::DYNAMIC_BLOCK:
+            return "DYNAMIC_BLOCK";
+        default:
+            throw std::invalid_argument("Invalid value for BoolMatchBlockType");
+    }
+}
+
 class BoolMatchMatrixBase
 {
 public:

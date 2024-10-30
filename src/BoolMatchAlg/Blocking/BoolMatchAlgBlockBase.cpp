@@ -19,6 +19,7 @@ m_UseLitDrop(inputParser.getBoolCmdOption("/alg/block/use_lit_drop", true)),
 m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/block/lit_drop_conflict_limit", 0)),
 // default is false
 m_LitDropChekRecurCore(inputParser.getBoolCmdOption("/alg/block/lit_drop_recur_ucore", false)),
+m_BlockMatchTypeWithInputsVal(ConvertToBoolMatchBlockType(inputParser.getUintCmdOption("/alg/block/block_match_type", DEF_BLOCK_MATCH_TYPE_UINT))),
 m_StopAfterBlockingAllNonValidMatches(inputParser.getBoolCmdOption("/alg/block/stop_after_blocking_all_non_valid_matches", false)),
 m_Solver(nullptr), 
 m_DualSolver(nullptr),
@@ -69,7 +70,7 @@ void BoolMatchAlgBlockBase::_InitializeFromAIGs()
     vector<SATLIT> trgInputs = m_Solver->GetLitsFromAIGInputs(m_TrgInputs, false);
 
     // TODO: edit the params here for the matrix
-    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_Solver, srcInputs, trgInputs, BoolMatchBlockType::DYNAMIC_BLOCK, m_AllowInputNegMap, initMatch, false);
+    m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_Solver, srcInputs, trgInputs, m_BlockMatchTypeWithInputsVal, m_AllowInputNegMap, initMatch, false);
 }
 
 
@@ -127,7 +128,7 @@ void BoolMatchAlgBlockBase::PrintInitialInformation()
             } 
         }
     }
-      
+    cout << "c Blocking type with inputs values: " << ConvertBoolMatchBlockTypeToString(m_BlockMatchTypeWithInputsVal) << endl;
 }
 
 

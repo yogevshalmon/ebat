@@ -53,6 +53,8 @@ class BoolMatchAlgBlockBase : public BoolMatchAlgBase
         const unsigned m_LitDropConflictLimit;
         // if to check unsat core with each drop lit check
         const bool m_LitDropChekRecurCore;
+        // choose the blocking type for the matrix when we use the inputs values for the blocking
+        const BoolMatchBlockType m_BlockMatchTypeWithInputsVal;
         // if to stop after blocking all the non-valid matches
         const bool m_StopAfterBlockingAllNonValidMatches;
   
