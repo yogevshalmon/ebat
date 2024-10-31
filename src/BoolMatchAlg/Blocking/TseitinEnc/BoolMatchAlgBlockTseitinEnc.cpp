@@ -48,7 +48,11 @@ void BoolMatchAlgBlockTseitinEnc::PrintInitialInformation()
 {
     BoolMatchAlgBlockBase::PrintInitialInformation();
 
-    cout << "c Use Tseitin encoding" << endl;   
+    cout << "c Use Tseitin encoding" << endl;
+    if (m_UseMaxValApprxStrat)
+    {
+        cout << "c Use max val approx strat" << endl;
+    }
 }
 
 void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
