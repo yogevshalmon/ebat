@@ -497,7 +497,7 @@ INPUT_ASSIGNMENT BoolMatchSolverBase::GetAssignmentForAIGLits(const vector<AIGLI
 }
 
 pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg,
-    bool useLitDrop, int dropt_lit_conflict_limit, bool useRecurUnCore)
+    bool useLitDrop, int dropt_lit_conflict_limit)
 {
     // assert that the solver was init from aig, it is dual and it is in Tseitin encoding
     assert(m_IsSolverInitFromAIG);
@@ -627,20 +627,6 @@ pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const
                 // still unsat we can remove the correspond lit assignment from the core
                 genTrgAssg.erase(genTrgAssg.begin() + (assumpIndex - assumpSizeAfterSrcValAssmp));
 
-                /*if (useRecurUnCore)
-                {
-                    // check recursive the UnsatCore
-                    for (int newCoreassumPos = assumpIndex - 1; newCoreassumPos >= 0; --newCoreassumPos)
-                    {
-                        if (!IsAssumptionRequired(newCoreassumPos))
-                        {
-                            litDropAsmpForSolver.erase(litDropAsmpForSolver.begin() + newCoreassumPos);
-                            coreValues.erase(coreValues.begin() + newCoreassumPos);
-                            // reduce the current index also, skipping the removed stuff
-                            assumpIndex--;
-                        }
-                    }
-                }*/
             } 
             else if (resStatus == SAT_RET_STATUS) 
             {

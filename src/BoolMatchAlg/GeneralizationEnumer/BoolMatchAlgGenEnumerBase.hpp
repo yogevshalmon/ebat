@@ -54,8 +54,6 @@ class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
         const bool m_UseLitDrop;
         // if > 0 use conflict limit when use drop lit in unsat core
         const unsigned m_LitDropConflictLimit;
-        // if to check unsat core with each drop lit check
-        const bool m_LitDropChekRecurCore;
   
 		
         // *** Variables ***

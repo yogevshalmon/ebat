@@ -17,8 +17,6 @@ m_UseDualSolver(inputParser.getBoolCmdOption("/alg/use_ucore", false)),
 m_UseLitDrop(inputParser.getBoolCmdOption("/alg/use_lit_drop", true)),
 // default is 0 i.e. none
 m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/lit_drop_conflict_limit", 0)),
-// default is false
-m_LitDropChekRecurCore(inputParser.getBoolCmdOption("/alg/lit_drop_recur_ucore", false)),
 m_Solver(nullptr), 
 m_DualSolver(nullptr),
 m_InputMatchMatrix(nullptr),
@@ -121,10 +119,6 @@ void BoolMatchAlgGenEnumerBase::PrintInitialInformation()
             {
                 cout << "c Limit conflict in literal dropping to " << m_LitDropConflictLimit << endl;
             }
-            if (m_LitDropChekRecurCore)
-            {
-                cout << "c Use recursive unSAT-core check in literal dropping" << endl;
-            } 
         }
     }
 }
@@ -148,7 +142,7 @@ pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchAlgGenEnumerBase::GeneralizeMo
     }
     if (m_UseDualSolver)
     {
-        pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> generalizedModels = m_DualSolver->GetUnSATCore(generalizeSrcModel, generalizeTrgModel, m_UseLitDrop, m_LitDropConflictLimit, m_LitDropChekRecurCore);
+        pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> generalizedModels = m_DualSolver->GetUnSATCore(generalizeSrcModel, generalizeTrgModel, m_UseLitDrop, m_LitDropConflictLimit);
         generalizeSrcModel = generalizedModels.first;
         generalizeTrgModel = generalizedModels.second;
     }

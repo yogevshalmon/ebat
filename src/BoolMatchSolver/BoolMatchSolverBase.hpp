@@ -166,7 +166,7 @@ public:
     // dropt_lit_conflict_limit - limit the conflict limit for each check for drop lit
     // useRecurUnCore - if to use unsat core extraction recursivly with each drop lit check
     // NOTE: we assume this is a dual solver, and the assignment is from the plain solver
-    std::pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> GetUnSATCore(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg, bool useLitDrop = false, int dropt_lit_conflict_limit = -1, bool useRecurUnCore = false);
+    std::pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> GetUnSATCore(const INPUT_ASSIGNMENT& srcAssg, const INPUT_ASSIGNMENT& trgAssg, bool useLitDrop = false, int dropt_lit_conflict_limit = -1);
 
     // assert that the outputs differ
     // this is usfull since if we want to check if to outputs are equal, we check that they can not be different
