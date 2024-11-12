@@ -24,6 +24,9 @@ class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
 
         const bool m_UseIpaisrAsPrimary;
         const bool m_UseIpaisrAsDual;
+        // if to try to strengthen valid matches by using UnSAT core extraction on the plain solver
+        // NOTE: valid match means we have UnSAT
+        const bool m_UseUcoreForValidMatch;
 
         // *** Variables ***
 
