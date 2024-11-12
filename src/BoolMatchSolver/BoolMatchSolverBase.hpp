@@ -152,6 +152,12 @@ public:
     // used for getting assigment from solver for the circuit inputs
     INPUT_ASSIGNMENT GetAssignmentForAIGLits(const std::vector<AIGLIT>& aigLits, bool isLitFromSrc) const;
 
+    // check if assumption at pos is required
+    virtual bool IsAssumptionRequired(size_t pos)
+    {
+        throw std::runtime_error("Function not implemented");
+    }
+
     // get unsat core under the assumption of the assignments from the src and trg
     // return the result assignment of the core for the src and trg in the form of <src, trg>
     // if timeout return the inital values
@@ -172,12 +178,6 @@ protected:
     // handle every new SAT lit that is added to the solver
     // if abs(lit) > m_MaxVar update m_MaxVar
     void HandleNewSATLit(SATLIT lit);
-
-    // check if assumption at pos is required
-    virtual bool IsAssumptionRequired(size_t pos)
-    {
-        throw std::runtime_error("Function not implemented");
-    }
 
     // write the and operation l = r1 & r2
     void WriteAnd(SATLIT l, SATLIT r1, SATLIT r2);

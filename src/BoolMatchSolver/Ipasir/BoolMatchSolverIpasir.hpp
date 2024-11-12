@@ -33,10 +33,10 @@ class BoolMatchSolverIpasir : public BoolMatchSolverBase
         // check if the sat lit is satisfied, must work at any solver
         virtual bool IsSATLitSatisfied(SATLIT lit) const;
 
-    protected:
-
         // check if assumption at pos is required
         virtual bool IsAssumptionRequired(size_t pos);
+
+    protected:
         
         // *** Params ***
 
