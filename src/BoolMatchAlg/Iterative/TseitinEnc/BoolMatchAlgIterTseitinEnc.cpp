@@ -160,7 +160,15 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
                 // }
                 // TODO!! iterate and create the full matches form the partial
                 currMatch = currPartialValidMatch;
+
+                // check if we manage to generalize the match to tautology
+                if (currMatch.size() == 0)
+                {
+                    // we have a tautology
+                    cout << "c Found tautology when using UnSAT core for valid matches" << endl;
+                }
             }
+            
 
             if (m_PrintMatches)
             {
