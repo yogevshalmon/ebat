@@ -305,9 +305,9 @@ void BoolMatchMatrixBase::EliminateOrEnforceMatchesByInputsVal(const MULT_INDX_A
 			{
 				continue;
 			}
-			vector<MatrixIndexVecMatch> combAtDepth = AllComb(srcIndexPerValue[val], trgIndexPerValue[val]);
+			vector<MatrixIndexVecMatch> comb = AllComb(srcIndexPerValue[val], trgIndexPerValue[val]);
 
-			uniqueCombinations = CombineAllComb(uniqueCombinations, combAtDepth);
+			uniqueCombinations = CombineAllComb(uniqueCombinations, comb);
 		}
 
 		EliminateMatches(uniqueCombinations);
