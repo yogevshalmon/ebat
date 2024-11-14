@@ -30,7 +30,14 @@ class BoolMatchAlgBlockTseitinEnc : public BoolMatchAlgBlockBase
         // it will cause the blocking alg to preform better since it can consider only the smallest group (maximizing the large group -> minimizing the small group)
         const bool m_UseMaxValApprxStrat;
 
+        // if to try to strengthen valid matches by using UnSAT core extraction on a new plain instance
+        // NOTE: valid match means we have UnSAT after we finished blocking all the non-valid matches
+        const bool m_UseUcoreForValidMatch;
+
         // *** Variables ***
+        
+        // solver for the circuits mitter if m_UseUcoreForValidMatch is used
+        BoolMatchSolverBase* m_UcoreSolverForValidMatch;
 
 
 		// *** Stats ***

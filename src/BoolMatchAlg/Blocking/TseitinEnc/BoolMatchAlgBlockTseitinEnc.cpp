@@ -8,7 +8,8 @@ BoolMatchAlgBlockTseitinEnc::BoolMatchAlgBlockTseitinEnc(const InputParser& inpu
 BoolMatchAlgBlockBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_plain", false)),
 m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_dual", true)),
-m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/block/use_max_val_apprx_strat", false))
+m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/block/use_max_val_apprx_strat", false)),
+m_UseUcoreForValidMatch(inputParser.getBoolCmdOption("/alg/block/use_ucore_for_valid_match", false))
 {
     if (m_UseIpaisrAsPrimary)
     {
@@ -32,6 +33,13 @@ m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/block/use_max_val_apprx
         }  
     }
 
+    if (m_UseUcoreForValidMatch)
+    {
+        // TODO - add param?
+        // NOET: currently we use ipasir for the ucore solver since it should be better for the ucore extraction
+        m_UcoreSolverForValidMatch = new BoolMatchSolverIpasir(inputParser, CirEncoding::TSEITIN_ENC, false);
+    }
+
     // check m_UseMaxValApprxStrat is only use when we do not allow neg map
     if (m_UseMaxValApprxStrat && m_AllowInputNegMap)
     {
@@ -41,7 +49,7 @@ m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/block/use_max_val_apprx
 
 BoolMatchAlgBlockTseitinEnc::~BoolMatchAlgBlockTseitinEnc()
 {
-
+    delete m_UcoreSolverForValidMatch;
 }
 
 void BoolMatchAlgBlockTseitinEnc::PrintInitialInformation()
@@ -52,6 +60,10 @@ void BoolMatchAlgBlockTseitinEnc::PrintInitialInformation()
     if (m_UseMaxValApprxStrat)
     {
         cout << "c Use max val approx strat" << endl;
+    }
+    if (m_UseUcoreForValidMatch)
+    {
+        cout << "c Use UnSAT core for valid match" << endl;
     }
 }
 
@@ -129,7 +141,6 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
         numOfNonValidMatch++;
         m_TotalNumberOfMatches++;
 
-        
         INPUT_ASSIGNMENT srcAssg = m_Solver->GetAssignmentForAIGLits(m_SrcInputs, true);
         INPUT_ASSIGNMENT trgAssg = m_Solver->GetAssignmentForAIGLits(m_TrgInputs, false);
         
@@ -164,6 +175,13 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
         return;
     }
 
+    // if needed initialize m_UcoreSolverForValidMatch
+    if (m_UseUcoreForValidMatch)
+    {
+        m_UcoreSolverForValidMatch->InitializeSolverFromAIG(m_AigParserSrc, m_AigParserTrg);
+        m_UcoreSolverForValidMatch->AssertOutputDiff(false);
+    }
+
     SOLVER_RET_STATUS nextValidMatchStatus = onlyValidMatchMatrix.FindNextMatch();
     while (nextValidMatchStatus == SAT_RET_STATUS)
     {
@@ -171,6 +189,74 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
         m_NumberOfValidMatches++;
 
         MatrixIndexVecMatch currMatch = onlyValidMatchMatrix.GetCurrMatch();
+        
+        if (m_UseUcoreForValidMatch)
+        {
+            vector<SATLIT> assump = GetInputMatchAssump(m_UcoreSolverForValidMatch, currMatch);
+
+		    SOLVER_RET_STATUS res = m_UcoreSolverForValidMatch->SolveUnderAssump(assump);
+            if (res == TIMEOUT_RET_STATUS)
+            {
+                // TODO: should we throw exception here?
+                m_IsTimeOut = true;
+                throw runtime_error("Timeout reached");
+            }
+            // response must be unsat at this point, throw exception if not
+            if (res != UNSAT_RET_STATUS)
+            {
+                throw runtime_error("Solver return non - Unsatisfiable status when using UnSAT core for valid matches");
+            }
+
+            // TODO - from now on this code is duplicated from src/BoolMatchAlg/Iterative/TseitinEnc/BoolMatchAlgIterTseitinEnc.cpp, should we create a function for this?
+
+            // will hold the partial map of the inputs suffice for valid mapping, meaning no matter how we complete the rest of the mapping
+            MatrixIndexVecMatch currPartialValidMatch;
+            // NOTE: at this point we know the only assumption used are the matches assumptions, this is important for the UCore extraction
+            // go over the match assumptions and try to remove
+            for (size_t matchIndex = 0; matchIndex < currMatch.size(); matchIndex++)
+            {
+                if (m_UcoreSolverForValidMatch->IsAssumptionRequired(matchIndex))
+                {
+                    currPartialValidMatch.push_back(currMatch[matchIndex]);
+                }
+            }
+
+            //TODO add param
+            // now do minimal unsat core with drop lit
+            // iterating from back to begin to support remove and iteration of vector
+            for (int matchIndex = currPartialValidMatch.size() - 1; matchIndex >= 0; --matchIndex) 
+            {
+                // Temporary store the current match
+                MatrixIndexMatch tempMatch = currPartialValidMatch[matchIndex];
+
+                // Remove the current lit from the, copy the last element
+                currPartialValidMatch[matchIndex] = currPartialValidMatch.back();
+                currPartialValidMatch.pop_back();
+
+                vector<SATLIT> currAssump = GetInputMatchAssump(m_UcoreSolverForValidMatch, currPartialValidMatch);
+                if (CheckSolverUnderAssump(m_UcoreSolverForValidMatch, currAssump)) 
+                {
+                    // this mean we manage to remove the match from the core
+                    // TODO add here recurisve unsat core extraction?			
+                } 
+                else 
+                {
+                    // we can not remove the match from the core
+                    // restore the lit to the vector, where the position is changed (should not be a problem)
+                    currPartialValidMatch.push_back(tempMatch);
+                }
+            }
+
+            // NOTE: should we iterate and create the full matches form the partial?
+            currMatch = currPartialValidMatch;
+
+            // check if we manage to generalize the match to tautology
+            if (currMatch.size() == 0)
+            {
+                // we have a tautology
+                cout << "c Found tautology when using UnSAT core for valid matches" << endl;
+            }
+        }
 
         if (m_PrintMatches)
         {
