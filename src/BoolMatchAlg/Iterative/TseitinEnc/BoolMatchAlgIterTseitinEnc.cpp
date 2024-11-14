@@ -50,34 +50,6 @@ void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
 
 void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 {
-
-    auto CheckMatchUnderAssmp = [&](vector<SATLIT>& assump) -> bool
-	{
-		SOLVER_RET_STATUS res = ERR_RET_STATUS;
-
-		res = m_Solver->SolveUnderAssump(assump);
-		
-		// now check the returned status
-		if (res == UNSAT_RET_STATUS)
-		{ // match found
-			return true;
-		}
-		else if (res == SAT_RET_STATUS)
-		{ // match isnt correct there is a counter example where the outputs doesnt match
-			return false;
-		}
-		else if (res == TIMEOUT_RET_STATUS)
-		{
-            // TODO: should we throw exception here?
-			m_IsTimeOut = true;
-			throw runtime_error("Timeout reached");
-		}
-		else
-		{ // in case of an error etc..
-			throw runtime_error("Solver return err status");
-		}
-	};
-
     // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfMatch = 0;
 
@@ -91,7 +63,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         // get the assumption for the current input match
         vector<SATLIT> assump = GetInputMatchAssump(m_Solver, currMatch);
-        if (CheckMatchUnderAssmp(assump))
+        if (CheckSolverUnderAssump(m_Solver, assump))
 		{
             m_NumberOfValidMatches++;
 
@@ -122,7 +94,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
                     currPartialValidMatch.pop_back();
 
                     vector<SATLIT> currAssump = GetInputMatchAssump(m_Solver, currPartialValidMatch);
-                    if (CheckMatchUnderAssmp(currAssump)) 
+                    if (CheckSolverUnderAssump(m_Solver, currAssump)) 
                     {
                         // this mean we manage to remove the match from the core
                         // TODO add here recurisve unsat core extraction?			
@@ -140,7 +112,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
                 // {
                 //     cout << "Managed to generalize to partial valid match with UCore from: " << to_string(currMatch.size()) << "->" << to_string(currPartialValidMatch.size()) << endl;
                 // }
-                // TODO!! iterate and create the full matches form the partial
+                // NOTE: should we iterate and create the full matches form the partial?
                 currMatch = currPartialValidMatch;
 
                 // check if we manage to generalize the match to tautology

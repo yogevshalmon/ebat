@@ -166,3 +166,28 @@ vector<SATLIT> BoolMatchAlgGenEnumerBase::GetInputMatchAssump(BoolMatchSolverBas
 
     return assump;
 };
+
+bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump)
+{
+    SOLVER_RET_STATUS res = solver->SolveUnderAssump(assump);
+
+    // now check the returned status
+    if (res == UNSAT_RET_STATUS)
+    { // match found
+        return true;
+    }
+    else if (res == SAT_RET_STATUS)
+    { // match isnt correct there is a counter example where the outputs doesnt match
+        return false;
+    }
+    else if (res == TIMEOUT_RET_STATUS)
+    {
+        // TODO: should we throw exception here?
+        m_IsTimeOut = true;
+        throw runtime_error("Timeout reached");
+    }
+    else
+    { // in case of an error etc..
+        throw runtime_error("Solver return err status");
+    }
+};

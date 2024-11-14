@@ -44,6 +44,11 @@ class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
 
         // help util function to get the assumption for the current input match under specific solver
         std::vector<SATLIT> GetInputMatchAssump(BoolMatchSolverBase* solver, const MatrixIndexVecMatch& fmatch);
+
+        // help util function to check the solver status under assumption
+        // return true if the result is UNSAT, false if SAT
+        // if timeout throw exception
+        bool CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump);
         
         // *** Params ***
 
