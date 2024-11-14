@@ -50,24 +50,6 @@ void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
 
 void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 {
-    // get the assumption for the current input match
-	auto GetInputMatchAssump = [&](const MatrixIndexVecMatch& fmatch) -> vector<SATLIT>
-	{
-		vector<SATLIT> assump;
-		for (const MatrixIndexMatch& match : fmatch)
-		{
-			bool isMatchPos = IsMatchPos(match);
-
-            // cout << "c curr assume match, is pos " << isMatchPos << " " << match.first << " -> " << match.second << endl; 
-
-            AIGLIT srcLit = m_SrcInputs[GetAbsRealIndex(match.first)];
-            AIGLIT trgLit = m_TrgInputs[GetAbsRealIndex(match.second)];
-
-			assump.push_back(m_Solver->GetInputEqAssmp(srcLit, trgLit, isMatchPos));
-		}
-
-		return assump;
-	};
 
     auto CheckMatchUnderAssmp = [&](vector<SATLIT>& assump) -> bool
 	{
@@ -108,7 +90,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
         MatrixIndexVecMatch currMatch = m_InputMatchMatrix->GetCurrMatch();
 
         // get the assumption for the current input match
-        vector<SATLIT> assump = GetInputMatchAssump(currMatch);
+        vector<SATLIT> assump = GetInputMatchAssump(m_Solver, currMatch);
         if (CheckMatchUnderAssmp(assump))
 		{
             m_NumberOfValidMatches++;
@@ -139,7 +121,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
                     currPartialValidMatch[matchIndex] = currPartialValidMatch.back();
                     currPartialValidMatch.pop_back();
 
-                    vector<SATLIT> currAssump = GetInputMatchAssump(currPartialValidMatch);
+                    vector<SATLIT> currAssump = GetInputMatchAssump(m_Solver, currPartialValidMatch);
                     if (CheckMatchUnderAssmp(currAssump)) 
                     {
                         // this mean we manage to remove the match from the core
@@ -169,7 +151,6 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
                 }
             }
             
-
             if (m_PrintMatches)
             {
                 PrintMatrixIndexMatchAsAIG(currMatch);

@@ -148,3 +148,21 @@ pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchAlgGenEnumerBase::GeneralizeMo
     }
     return make_pair(generalizeSrcModel, generalizeTrgModel);
 };
+
+vector<SATLIT> BoolMatchAlgGenEnumerBase::GetInputMatchAssump(BoolMatchSolverBase* solver, const MatrixIndexVecMatch& fmatch)
+{
+    vector<SATLIT> assump;
+    for (const MatrixIndexMatch& match : fmatch)
+    {
+        bool isMatchPos = IsMatchPos(match);
+
+        // cout << "c curr assume match, is pos " << isMatchPos << " " << match.first << " -> " << match.second << endl; 
+
+        AIGLIT srcLit = m_SrcInputs[GetAbsRealIndex(match.first)];
+        AIGLIT trgLit = m_TrgInputs[GetAbsRealIndex(match.second)];
+
+        assump.push_back(solver->GetInputEqAssmp(srcLit, trgLit, isMatchPos));
+    }
+
+    return assump;
+};
