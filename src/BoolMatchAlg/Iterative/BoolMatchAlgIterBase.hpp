@@ -28,6 +28,11 @@ class BoolMatchAlgIterBase : public BoolMatchAlgGenEnumerBase
 
         // choose the blocking type for the matrix when we use the inputs values for the blocking
         const BoolMatchBlockType m_BlockMatchTypeWithInputsVal;
+        // if to use eager or lazy init for the input eq assumption
+        // if eager we will create all the assumption at the start
+        // if lazy we will create the assumption only when needed
+        // NOTE: the input eq hash should be on: "/solver/hash_inp_eq_assump 1")
+        const bool m_EagerInitInputEqAssump;
   
 		
         // *** Variables ***
