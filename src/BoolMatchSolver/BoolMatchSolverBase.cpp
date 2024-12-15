@@ -7,7 +7,7 @@ BoolMatchSolverBase::BoolMatchSolverBase(const InputParser& inputParser, const C
 // the desire encoding
 m_CirEncoding(enc),
 m_IsDual(isDual),
-m_CheckExistInputEqualAssmp(true),
+m_CheckExistInputEqualAssmp(inputParser.getBoolCmdOption("/solver/hash_inp_eq_assump", true)),
 m_IsSolverInitFromAIG(false),
 m_TargetSATLitOffset(0),
 m_MaxVar(1),
