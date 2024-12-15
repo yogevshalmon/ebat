@@ -17,5 +17,5 @@ static const std::vector<std::string> MODES = {
 
 static const std::unordered_map<std::string, std::vector<std::string>> MODE_PARAMS
 {
-    {NAIVE_ALG, {"/alg/blocking/use_cirsim","1"}},   
+    {NAIVE_ALG, {}},   
 };
