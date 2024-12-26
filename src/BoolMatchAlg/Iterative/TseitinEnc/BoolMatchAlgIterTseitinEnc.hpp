@@ -24,6 +24,12 @@ class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
 
         const bool m_UseIpaisrAsPrimary;
         const bool m_UseIpaisrAsDual;
+
+        // if to try to maximize the polarity of the inputs to specific value (i.e. 0/1)
+        // this is usfefull when we do not allow neg map and we want to maximize the 0/1 values for example 
+        // it will cause the blocking alg to preform better since it can consider only the smallest group (maximizing the large group -> minimizing the small group)
+        const bool m_UseMaxValApprxStrat;
+        
         // if to try to strengthen valid matches by using UnSAT core extraction on the plain solver
         // NOTE: valid match means we have UnSAT
         const bool m_UseUcoreForValidMatch;
