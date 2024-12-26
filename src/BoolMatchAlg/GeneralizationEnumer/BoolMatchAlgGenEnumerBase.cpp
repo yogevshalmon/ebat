@@ -167,8 +167,31 @@ vector<SATLIT> BoolMatchAlgGenEnumerBase::GetInputMatchAssump(BoolMatchSolverBas
     return assump;
 };
 
-bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump)
+bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump,
+    bool forcePolToVal, unsigned value)
 {
+    if (forcePolToVal)
+    {
+        // value should be either 0 -or- 1
+        assert(value == 0 || value == 1);
+
+        TVal polVal = value == 0 ? TVal::False : TVal::True;
+
+        // fix the polarity for the inputs for both src and trg
+        // TODO - should we boost the score aswell?
+        for (const AIGLIT& lit : m_SrcInputs)
+        {
+            m_Solver->FixInputPolarity(lit, true, polVal);
+            //m_Solver->BoostInputScore(lit, true);
+        }
+
+        for (const AIGLIT& lit : m_TrgInputs)
+        {
+            m_Solver->FixInputPolarity(lit, false, polVal);
+            //m_Solver->BoostInputScore(lit, false);
+        }
+    }
+
     SOLVER_RET_STATUS res = solver->SolveUnderAssump(assump);
 
     // now check the returned status

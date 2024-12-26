@@ -6,7 +6,7 @@
 #include "CirSimulation/CirSim.hpp"
 
 /*
-    Base solver class for any algorithm that will use enumeratioon the possible matrix matches
+    Base solver class for any algorithm that will use enumeration on the possible matrix matches
     and will use generalization for the CEX (counter-example/non-valid) models
 */
 class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
@@ -48,7 +48,10 @@ class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
         // help util function to check the solver status under assumption
         // return true if the result is UNSAT, false if SAT
         // if timeout throw exception
-        bool CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump);
+        // if forcePolToVal is true then we force the polarity of the inputs to the value
+        // value can be 0 or 1
+        bool CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump, 
+            bool forcePolToVal = false, unsigned value = 0);
         
         // *** Params ***
 

@@ -78,65 +78,13 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
     MatrixIndexVecMatch initMatch = {};
     BoolMatchMatrixSingleVars onlyValidMatchMatrix = BoolMatchMatrixSingleVars(&validMatchSolver, m_InputSize, BoolMatchBlockType::DYNAMIC_BLOCK, m_AllowInputNegMap, initMatch, false);
 
-    // find the next non valid match
-    // forcePolToVal - if true we force the polarity of the inputs to the value
-    //  used if 
-    auto FindNextNonValidMatch = [&](bool forcePolToVal, unsigned value) -> bool
-	{
-		SOLVER_RET_STATUS res = ERR_RET_STATUS;
-
-        if (forcePolToVal)
-        {
-            // value should be either 0 -or- 1
-            assert(value == 0 || value == 1);
-
-            TVal polVal = value == 0 ? TVal::False : TVal::True;
-
-            // fix the polarity for the inputs for both src and trg
-            // TODO - should we boost the score aswell?
-            for (const AIGLIT& lit : m_SrcInputs)
-            {
-                m_Solver->FixInputPolarity(lit, true, polVal);
-                //m_Solver->BoostInputScore(lit, true);
-            }
-
-            for (const AIGLIT& lit : m_TrgInputs)
-            {
-                m_Solver->FixInputPolarity(lit, false, polVal);
-                //m_Solver->BoostInputScore(lit, false);
-            }
-        }
-
-		res = m_Solver->SolveUnderAssump(assump);
-		
-		// now check the returned status
-
-		if (res == SAT_RET_STATUS)
-		{ // non valid match found
-			return true;
-		}
-		else if (res == UNSAT_RET_STATUS)
-		{ // no more non valid matches
-			return false;
-		}
-		else if (res == TIMEOUT_RET_STATUS)
-		{
-            // TODO: should we throw exception here?
-			m_IsTimeOut = true;
-			throw runtime_error("Timeout reached");
-		}
-		else
-		{ // in case of an error etc..
-			throw runtime_error("Solver return err status");
-		}
-	};
-
     // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfNonValidMatch = 0;
 
     unsigned lastMaxVal = 0;
 
-    while (FindNextNonValidMatch(m_UseMaxValApprxStrat, lastMaxVal))
+    // while we have non valid matches - meaning we get SAT (false) from the solver
+    while (!CheckSolverUnderAssump(m_Solver, assump, m_UseMaxValApprxStrat, lastMaxVal))
     {
         numOfNonValidMatch++;
         m_TotalNumberOfMatches++;
