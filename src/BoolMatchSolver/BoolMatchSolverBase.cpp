@@ -668,20 +668,6 @@ pair<INPUT_ASSIGNMENT, INPUT_ASSIGNMENT> BoolMatchSolverBase::GetUnSATCore(const
                 // still unsat we can remove the correspond lit assignment from the core
                 genSrcAssg.erase(genSrcAssg.begin() + assumpIndex);
 
-                /*if (useRecurUnCore)
-                {
-                    // check recursive the UnsatCore
-                    for (int newCoreassumPos = assumpIndex - 1; newCoreassumPos >= 0; --newCoreassumPos)
-                    {
-                        if (!IsAssumptionRequired(newCoreassumPos))
-                        {
-                            litDropAsmpForSolver.erase(litDropAsmpForSolver.begin() + newCoreassumPos);
-                            coreValues.erase(coreValues.begin() + newCoreassumPos);
-                            // reduce the current index also, skipping the removed stuff
-                            assumpIndex--;
-                        }
-                    }
-                }*/
             } 
             else if (resStatus == SAT_RET_STATUS) 
             {
