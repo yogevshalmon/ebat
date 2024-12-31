@@ -178,17 +178,17 @@ bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solv
         TVal polVal = value == 0 ? TVal::False : TVal::True;
 
         // fix the polarity for the inputs for both src and trg
-        // TODO - should we boost the score aswell?
+        // and also boost the score
         for (const AIGLIT& lit : m_SrcInputs)
         {
             m_Solver->FixInputPolarity(lit, true, polVal);
-            //m_Solver->BoostInputScore(lit, true);
+            m_Solver->BoostInputScore(lit, true);
         }
 
         for (const AIGLIT& lit : m_TrgInputs)
         {
             m_Solver->FixInputPolarity(lit, false, polVal);
-            //m_Solver->BoostInputScore(lit, false);
+            m_Solver->BoostInputScore(lit, false);
         }
     }
 
