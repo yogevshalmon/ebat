@@ -9,7 +9,8 @@ BoolMatchAlgBlockBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_plain", false)),
 m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/block/use_ipasir_for_dual", true)),
 m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/block/use_max_val_apprx_strat", false)),
-m_UseUcoreForValidMatch(inputParser.getBoolCmdOption("/alg/block/use_ucore_for_valid_match", false))
+m_UseUcoreForValidMatch(inputParser.getBoolCmdOption("/alg/block/use_ucore_for_valid_match", false)),
+m_UcoreSolverForValidMatch(nullptr)
 {
     if (m_UseIpaisrAsPrimary)
     {
