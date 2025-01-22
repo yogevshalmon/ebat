@@ -29,6 +29,9 @@ class BoolMatchAlgIterTseitinEnc : public BoolMatchAlgIterBase
         // this is usfefull when we do not allow neg map and we want to maximize the 0/1 values for example 
         // it will cause the blocking alg to preform better since it can consider only the smallest group (maximizing the large group -> minimizing the small group)
         const bool m_UseMaxValApprxStrat;
+        // if to use adaptivness to the max val approx strat
+        // meaning we will switch during the run between the values (0/1) to maximize
+        const bool m_UseAdapForMaxValApprxStrat;
         
         // if to try to strengthen valid matches by using UnSAT core extraction on the plain solver
         // NOTE: valid match means we have UnSAT

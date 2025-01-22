@@ -7,6 +7,7 @@ BoolMatchAlgIterBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_plain", false)),
 m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_dual", true)),
 m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_max_val_apprx_strat", false)),
+m_UseAdapForMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_adap_for_max_val_apprx_strat", true)),
 m_UseUcoreForValidMatch(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_ucore_for_valid_match", false))
 {
     if (m_UseIpaisrAsPrimary)
@@ -52,6 +53,10 @@ void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
     if (m_UseMaxValApprxStrat)
     {
         cout << "c Use max val approx strat" << endl;
+        if (m_UseAdapForMaxValApprxStrat)
+        {
+            cout << "c Use adaptive value strat for max val" << endl;
+        }
     }
     if (m_UseUcoreForValidMatch)
     {
@@ -172,11 +177,11 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
             m_InputMatchMatrix->BlockMatchesByInputsVal(InputAssg2Indx(srcAndTrgGen.first, true), InputAssg2Indx(srcAndTrgGen.second, false));
         }
 
-        // if m_UseMaxValApprxStrat is not used then we do not actually need this
-        if (m_UseMaxValApprxStrat)
+        if (m_UseMaxValApprxStrat && m_UseAdapForMaxValApprxStrat)
         {
             lastMaxVal = m_InputMatchMatrix->GetLastMaxVal();
         }
+
         nextMatch = m_InputMatchMatrix->FindNextMatch();
     }
 
