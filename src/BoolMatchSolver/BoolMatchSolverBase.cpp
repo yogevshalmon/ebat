@@ -154,7 +154,7 @@ void BoolMatchSolverBase::HandleNewSATLit(SATLIT lit)
     m_MaxVar = max(m_MaxVar, abs(lit));
 }
 
-void BoolMatchSolverBase::FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val)
+void BoolMatchSolverBase::FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val, bool onlyOnce)
 {
     switch (m_CirEncoding)
     {
@@ -163,7 +163,16 @@ void BoolMatchSolverBase::FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& v
             // we can not fix the polarity of the input to Dont care value in tseitin encoding
             assert(val != TVal::DontCare);
             SATLIT satLit = AIGLitToSATLit(lit, isSrc ? 0 : m_TargetSATLitOffset);
-            _FixPolarity(satLit);
+            // should be either True or False
+            if (val == TVal::True)
+            {
+                _FixPolarity(satLit, onlyOnce);
+            }
+            else if (val == TVal::False)
+            {
+                _FixPolarity(NegateSATLit(satLit), onlyOnce);
+            }
+            
         break;
         }
         case DUALRAIL_ENC:
@@ -173,16 +182,16 @@ void BoolMatchSolverBase::FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& v
             SATLIT negLit = GetNeg(dvar);
             if (val == TVal::DontCare)
             {
-                _FixPolarity(NegateSATLit(posLit));
-                _FixPolarity(NegateSATLit(negLit));
+                _FixPolarity(NegateSATLit(posLit), onlyOnce);
+                _FixPolarity(NegateSATLit(negLit), onlyOnce);
             }
             else if (val == TVal::True)
             {
-                _FixPolarity(posLit);
+                _FixPolarity(posLit, onlyOnce);
             }
             else
             {
-                _FixPolarity(negLit);
+                _FixPolarity(negLit, onlyOnce);
             }
         break;
         }

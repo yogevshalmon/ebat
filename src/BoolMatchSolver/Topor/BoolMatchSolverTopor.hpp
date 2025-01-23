@@ -41,7 +41,7 @@ class BoolMatchSolverTopor : public BoolMatchSolverBase
     protected:
 
         // fix ploratiy of lit
-        virtual void _FixPolarity(SATLIT lit);
+        virtual void _FixPolarity(SATLIT lit, bool onlyOnce = false);
         // boost score of lit
         virtual void _BoostScore(SATLIT lit);
         

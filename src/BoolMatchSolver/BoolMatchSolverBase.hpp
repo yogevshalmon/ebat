@@ -125,7 +125,7 @@ public:
         throw std::runtime_error("Function not implemented");
     }
 
-    void FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val);
+    void FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val, bool onlyOnce = false);
 
     void BoostInputScore(AIGLIT lit, bool isSrc);
 
@@ -199,7 +199,7 @@ protected:
 
     // implement in the derived class, fix polarity for specific lit
     // Note: does not work for ipasir solvers
-    virtual void _FixPolarity(SATLIT lit)
+    virtual void _FixPolarity(SATLIT lit, bool onlyOnce = false)
     {
         throw std::runtime_error("Function not implemented");
     }
