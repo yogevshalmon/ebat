@@ -19,6 +19,8 @@ m_UseLitDrop(inputParser.getBoolCmdOption("/alg/use_lit_drop", true)),
 m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/lit_drop_conflict_limit", 0)),
 m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/use_max_val_apprx_strat", false)),
 m_UseAdapForMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/use_adap_for_max_val_apprx_strat", true)),
+m_MaxValApprxStratInitVal(min(inputParser.getUintCmdOption("/alg/max_val_apprx_strat_init_val", 0),(unsigned)1)),
+m_MaxValApprxStratBoostVal(inputParser.getUintCmdOption("/alg/max_val_apprx_strat_boost_val", 1)),
 m_Solver(nullptr), 
 m_DualSolver(nullptr),
 m_InputMatchMatrix(nullptr),
@@ -131,7 +133,8 @@ void BoolMatchAlgGenEnumerBase::PrintInitialInformation()
     }
     if (m_UseMaxValApprxStrat)
     {
-        cout << "c Use max val approx strat" << endl;
+        cout << "c Use max val approx strat with init value of " << m_MaxValApprxStratInitVal << endl;
+        cout << "c Boost value for each input is " << m_MaxValApprxStratBoostVal << endl;
         if (m_UseAdapForMaxValApprxStrat)
         {
             cout << "c Use adaptive value strat for max val" << endl;

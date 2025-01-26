@@ -73,6 +73,11 @@ class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
         // if to use adaptivness to the max val approx strat
         // meaning we will switch during the run between the values (0/1) to maximize
         const bool m_UseAdapForMaxValApprxStrat;
+        // hold the inital value for the max val approx strat
+        // if > 1 we will use 1 as the initial value
+        const unsigned m_MaxValApprxStratInitVal;
+        // hold the boost value for each input in max val approx strat
+        const unsigned m_MaxValApprxStratBoostVal;
   
 		
         // *** Variables ***
