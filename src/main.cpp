@@ -98,10 +98,10 @@ int main(int argc, char **argv)
             {
                 boolMatchAlg = new BoolMatchAlgIterTseitinEnc(cmdInput);
             }
-            else if (blockingEnc == "dualrail")
-            {
-                boolMatchAlg = new BoolMatchAlgIterDREnc(cmdInput);
-            }
+            // else if (blockingEnc == "dualrail")
+            // {
+            //     boolMatchAlg = new BoolMatchAlgIterDREnc(cmdInput);
+            // }
             else
             {
                 throw runtime_error("unkown blocking enc type provided");
