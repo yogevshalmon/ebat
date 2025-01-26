@@ -6,8 +6,6 @@ BoolMatchAlgIterTseitinEnc::BoolMatchAlgIterTseitinEnc(const InputParser& inputP
 BoolMatchAlgIterBase(inputParser),
 m_UseIpaisrAsPrimary(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_plain", false)),
 m_UseIpaisrAsDual(inputParser.getBoolCmdOption("/alg/iter/use_ipasir_for_dual", true)),
-m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_max_val_apprx_strat", false)),
-m_UseAdapForMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_adap_for_max_val_apprx_strat", true)),
 m_UseUcoreForValidMatch(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_ucore_for_valid_match", false))
 {
     if (m_UseIpaisrAsPrimary)
@@ -31,12 +29,6 @@ m_UseUcoreForValidMatch(inputParser.getBoolCmdOption("/alg/iter/tseitin/use_ucor
             m_DualSolver = new BoolMatchSolverTopor(inputParser, CirEncoding::TSEITIN_ENC, true);
         }  
     }
-
-    // check m_UseMaxValApprxStrat is only use when we do not allow neg map
-    if (m_UseMaxValApprxStrat && m_AllowInputNegMap)
-    {
-        throw runtime_error("Can not use max val approx strat when neg map is allowed");
-    }
 }
 
 BoolMatchAlgIterTseitinEnc::~BoolMatchAlgIterTseitinEnc()
@@ -49,15 +41,6 @@ void BoolMatchAlgIterTseitinEnc::PrintInitialInformation()
     BoolMatchAlgIterBase::PrintInitialInformation();
 
     cout << "c Use Tseitin encoding" << endl;
-
-    if (m_UseMaxValApprxStrat)
-    {
-        cout << "c Use max val approx strat" << endl;
-        if (m_UseAdapForMaxValApprxStrat)
-        {
-            cout << "c Use adaptive value strat for max val" << endl;
-        }
-    }
     if (m_UseUcoreForValidMatch)
     {
         cout << "c Use UnSAT core for valid match" << endl;

@@ -17,6 +17,8 @@ m_UseDualSolver(inputParser.getBoolCmdOption("/alg/use_ucore", false)),
 m_UseLitDrop(inputParser.getBoolCmdOption("/alg/use_lit_drop", true)),
 // default is 0 i.e. none
 m_LitDropConflictLimit(inputParser.getUintCmdOption("/alg/lit_drop_conflict_limit", 0)),
+m_UseMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/use_max_val_apprx_strat", false)),
+m_UseAdapForMaxValApprxStrat(inputParser.getBoolCmdOption("/alg/use_adap_for_max_val_apprx_strat", true)),
 m_Solver(nullptr), 
 m_DualSolver(nullptr),
 m_InputMatchMatrix(nullptr),
@@ -28,6 +30,12 @@ m_TrgCirSimulation(nullptr)
     if (!m_AllowInputNegMap && (m_UseCirSim || m_UseDualSolver))
     {
         throw runtime_error("Can not use circuit simulation or UnSAT core generalization if negated map is not allowed");
+    }
+
+    // check m_UseMaxValApprxStrat is only use when we do not allow neg map
+    if (m_UseMaxValApprxStrat && m_AllowInputNegMap)
+    {
+        throw runtime_error("Can not use max val approx strat when neg map is allowed");
     }
 }
 
@@ -121,6 +129,14 @@ void BoolMatchAlgGenEnumerBase::PrintInitialInformation()
             }
         }
     }
+    if (m_UseMaxValApprxStrat)
+    {
+        cout << "c Use max val approx strat" << endl;
+        if (m_UseAdapForMaxValApprxStrat)
+        {
+            cout << "c Use adaptive value strat for max val" << endl;
+        }
+    }
 }
 
 
@@ -168,7 +184,7 @@ vector<SATLIT> BoolMatchAlgGenEnumerBase::GetInputMatchAssump(BoolMatchSolverBas
 };
 
 bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump,
-    bool forcePolToVal, unsigned value)
+    bool forcePolToVal, unsigned value, double boostScore)
 {
     if (forcePolToVal)
     {
@@ -182,13 +198,13 @@ bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solv
         for (const AIGLIT& lit : m_SrcInputs)
         {
             m_Solver->FixInputPolarity(lit, true, polVal);
-            m_Solver->BoostInputScore(lit, true);
+            m_Solver->BoostInputScore(lit, true, boostScore);
         }
 
         for (const AIGLIT& lit : m_TrgInputs)
         {
             m_Solver->FixInputPolarity(lit, false, polVal);
-            m_Solver->BoostInputScore(lit, false);
+            m_Solver->BoostInputScore(lit, false, boostScore);
         }
     }
 

@@ -50,8 +50,9 @@ class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
         // if timeout throw exception
         // if forcePolToVal is true then we force the polarity of the inputs to the value
         // value can be 0 or 1
+        // boostScore is the score to boost the literals
         bool CheckSolverUnderAssump(BoolMatchSolverBase* solver, std::vector<SATLIT>& assump, 
-            bool forcePolToVal = false, unsigned value = 0);
+            bool forcePolToVal = false, unsigned value = 0, double boostScore = 1.0);
         
         // *** Params ***
 
@@ -65,6 +66,13 @@ class BoolMatchAlgGenEnumerBase : public BoolMatchAlgBase
         const bool m_UseLitDrop;
         // if > 0 use conflict limit when use drop lit in unsat core
         const unsigned m_LitDropConflictLimit;
+        // if to try to maximize the polarity of the inputs to specific value (i.e. 0/1)
+        // this is usfefull when we do not allow neg map and we want to maximize the 0/1 values for example 
+        // it will cause the blocking alg to preform better since it can consider only the smallest group (maximizing the large group -> minimizing the small group)
+        const bool m_UseMaxValApprxStrat;
+        // if to use adaptivness to the max val approx strat
+        // meaning we will switch during the run between the values (0/1) to maximize
+        const bool m_UseAdapForMaxValApprxStrat;
   
 		
         // *** Variables ***
