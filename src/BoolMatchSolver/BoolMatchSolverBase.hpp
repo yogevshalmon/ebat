@@ -127,7 +127,7 @@ public:
 
     void FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& val, bool onlyOnce = false);
 
-    void BoostInputScore(AIGLIT lit, bool isSrc);
+    void BoostInputScore(AIGLIT lit, bool isSrc, double value = 1.0);
 
     // get the circuit encoding for the current solver
     const CirEncoding& GetEnc() const;
@@ -206,7 +206,7 @@ protected:
 
     // implement in the derived class, boost for specific lit
     // Note: does not work for ipasir solvers
-    virtual void _BoostScore(SATLIT lit)
+    virtual void _BoostScore(SATLIT lit, double value = 1.0)
     {
         throw std::runtime_error("Function not implemented");
     }

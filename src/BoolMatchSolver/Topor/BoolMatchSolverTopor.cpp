@@ -73,9 +73,9 @@ void BoolMatchSolverTopor::_FixPolarity(SATLIT lit, bool onlyOnce)
     m_ToporSolver->FixPolarity(lit, onlyOnce);
 }
 
-void BoolMatchSolverTopor::_BoostScore(SATLIT lit)
+void BoolMatchSolverTopor::_BoostScore(SATLIT lit, double value)
 {
-    m_ToporSolver->BoostScore(lit);
+    m_ToporSolver->BoostScore(lit, value);
 }
 
 bool BoolMatchSolverTopor::IsSATLitSatisfied(SATLIT lit) const

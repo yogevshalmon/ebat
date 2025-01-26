@@ -203,21 +203,21 @@ void BoolMatchSolverBase::FixInputPolarity(AIGLIT lit, bool isSrc, const TVal& v
     }
 }
 
-void BoolMatchSolverBase::BoostInputScore(AIGLIT lit, bool isSrc)
+void BoolMatchSolverBase::BoostInputScore(AIGLIT lit, bool isSrc, double value)
 {
     switch (m_CirEncoding)
     {
         case TSEITIN_ENC:
         {
             SATLIT satLit = AIGLitToSATLit(lit, isSrc ? 0 : m_TargetSATLitOffset);
-            _BoostScore(AbsSATLit(satLit));
+            _BoostScore(AbsSATLit(satLit), value);
         break;
         }
         case DUALRAIL_ENC:
         {
             DRVAR dvar = AIGLitToDR(lit, isSrc ? 0 : m_TargetSATLitOffset);
-            _BoostScore(AbsSATLit(GetPos(dvar)));
-            _BoostScore(AbsSATLit(GetNeg(dvar)));
+            _BoostScore(AbsSATLit(GetPos(dvar)), value);
+            _BoostScore(AbsSATLit(GetNeg(dvar)), value);
         break;
         }
         default:
