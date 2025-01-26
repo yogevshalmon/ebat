@@ -71,10 +71,10 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
     // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfNonValidMatch = 0;
 
-    unsigned lastMaxVal = 0;
+    unsigned lastMaxVal = m_MaxValApprxStratInitVal;
 
     // while we have non valid matches - meaning we get SAT (false) from the solver
-    while (!CheckSolverUnderAssump(m_Solver, assump, m_UseMaxValApprxStrat, lastMaxVal))
+    while (!CheckSolverUnderAssump(m_Solver, assump, m_UseMaxValApprxStrat, lastMaxVal, m_MaxValApprxStratBoostVal))
     {
         numOfNonValidMatch++;
         m_TotalNumberOfMatches++;
@@ -101,7 +101,9 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         if (m_UseMaxValApprxStrat && m_UseAdapForMaxValApprxStrat)
         {
-            lastMaxVal = m_InputMatchMatrix->GetLastMaxVal();
+            // try to switch between 0 and 1
+            lastMaxVal = m_InputMatchMatrix->GetLastMaxVal() > 0 ? 0 : 1;
+            // lastMaxVal = m_InputMatchMatrix->GetLastMaxVal();
         }
     }
 

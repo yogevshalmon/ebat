@@ -52,7 +52,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
     // this is to use locally, we also have the global one (m_TotalNumberOfMatches)
     unsigned numOfMatch = 0;
 
-    unsigned lastMaxVal = 0;
+    unsigned lastMaxVal = m_MaxValApprxStratInitVal;
 
     SOLVER_RET_STATUS nextMatch = m_InputMatchMatrix->FindNextMatch();
     while (nextMatch == SAT_RET_STATUS)
@@ -64,7 +64,7 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         // get the assumption for the current input match
         vector<SATLIT> assump = GetInputMatchAssump(m_Solver, currMatch);
-        if (CheckSolverUnderAssump(m_Solver, assump, m_UseMaxValApprxStrat, lastMaxVal))
+        if (CheckSolverUnderAssump(m_Solver, assump, m_UseMaxValApprxStrat, lastMaxVal, m_MaxValApprxStratBoostVal))
 		{
             m_NumberOfValidMatches++;
 
@@ -162,7 +162,9 @@ void BoolMatchAlgIterTseitinEnc::FindAllMatchesUnderOutputAssert()
 
         if (m_UseMaxValApprxStrat && m_UseAdapForMaxValApprxStrat)
         {
-            lastMaxVal = m_InputMatchMatrix->GetLastMaxVal();
+            // try to switch between 0 and 1
+            lastMaxVal = m_InputMatchMatrix->GetLastMaxVal() > 0 ? 0 : 1;
+            // lastMaxVal = m_InputMatchMatrix->GetLastMaxVal();
         }
 
         nextMatch = m_InputMatchMatrix->FindNextMatch();
