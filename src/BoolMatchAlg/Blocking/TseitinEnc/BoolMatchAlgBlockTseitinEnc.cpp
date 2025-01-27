@@ -136,7 +136,6 @@ void BoolMatchAlgBlockTseitinEnc::FindAllMatchesUnderOutputAssert()
 		    SOLVER_RET_STATUS res = m_UcoreSolverForValidMatch->SolveUnderAssump(assump);
             if (res == TIMEOUT_RET_STATUS)
             {
-                // TODO: should we throw exception here?
                 m_IsTimeOut = true;
                 throw runtime_error("Timeout reached");
             }

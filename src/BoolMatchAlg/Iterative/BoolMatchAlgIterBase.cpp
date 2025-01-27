@@ -23,7 +23,6 @@ BoolMatchAlgIterBase::~BoolMatchAlgIterBase()
 void BoolMatchAlgIterBase::_InitMatchMatrix()
 {
     MatrixIndexVecMatch initMatch = {};
-    // TODO: edit the params here for the matrix
     m_InputMatchMatrix = new BoolMatchMatrixSingleVars(m_InputMatchSolver, m_InputSize, m_BlockMatchTypeWithInputsVal, m_AllowInputNegMap, initMatch, false);
 
     if (m_EagerInitInputEqAssump)
