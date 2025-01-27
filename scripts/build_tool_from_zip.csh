@@ -10,4 +10,5 @@ git clone https://github.com/arminbiere/cadical.git libs/sat/cadical
 
 
 cmake -S . -B build
+cd build
 make
