@@ -33,7 +33,9 @@ inline static AIGLIT AIGIndexToAIGLit(AIGINDEX index)
     return (AIGLIT)(index << 1);
 };
 
-// TODO check this?
+// return the negative lit of the given lit
+// 2 -> 3
+// 3 -> 2
 inline static AIGLIT NegateAIGLit(AIGLIT lit)
 {
     return lit ^ 1;

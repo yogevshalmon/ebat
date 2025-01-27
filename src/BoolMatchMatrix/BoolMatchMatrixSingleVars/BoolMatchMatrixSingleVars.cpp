@@ -34,7 +34,6 @@ BoolMatchMatrixBase(solver, srcInputs, trgInputs, blockMatchTypeWithInputsVal, a
 	{
 		for (const SATLIT trgInp : trgInputs)
 		{
-			// TODO fix warning
 			m_DataMatchMatrix[index] = CreateMatrixIndexVars(srcInp, trgInp);
 			index++;
 		}

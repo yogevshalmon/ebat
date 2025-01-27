@@ -4,7 +4,6 @@
 
 using namespace std;
 
-// TODO add to input parser /alg/gen_enumer/.... 
 BoolMatchAlgGenEnumerBase::BoolMatchAlgGenEnumerBase(const InputParser& inputParser):
 BoolMatchAlgBase(inputParser),
 // defualt is false
@@ -224,7 +223,6 @@ bool BoolMatchAlgGenEnumerBase::CheckSolverUnderAssump(BoolMatchSolverBase* solv
     }
     else if (res == TIMEOUT_RET_STATUS)
     {
-        // TODO: should we throw exception here?
         m_IsTimeOut = true;
         throw runtime_error("Timeout reached");
     }
