@@ -41,15 +41,34 @@ After building, you can run the tool. For example, to see help options:
 ```
 
 ## Reproducing Experiments
-This section details how to reproduce the experiments reported in Tables 1 and 2 of our SAT'24 submission.
+This section details how to reproduce the experiments reported in our Table 1 of our paper submission.
 
-### Benchmarks
-We used 388 benchmarks across 4 benchmark families. Benchmark files are located in the `benchmarks` directory with the structure:
+### Benchmark Structure
+We used 388 benchmarks across 4 benchmark families. Benchmark files are located in the `benchmarks` directory and are organized in a hierarchical structure:
 
-`benchmarks/%BENCH_FAMILY_ORIG/%BENCH_BASED_ORIG/%BENCH/(src|trg)/(src|trg).aag`
+```
+benchmarks/
+└── %BENCH_FAMILY_ORIG/
+    └── %BENCH_BASED_ORIG/
+        └── %BENCH/
+            ├── src/
+            │   └── src.aag
+            └── trg/
+                └── trg.aag
+```
 
-For example `benchmarks/iscas85/iscas85_c6288/last_out-vs-or` mean we consider  the `iscas85` family where we take the benchmark `iscas85_c6288` and compare `last_out` (taking the last output) vs  `or` (the disjunction of the outputs).
-Under each benchmark we have two directories, `src`, and `trg` that contain the actual AIGER file (it may contain also the original benchmark file in different format).
+For example, `benchmarks/iscas85/iscas85_c6288/last_out-vs-or/` represents:
+- Benchmark family: `iscas85`
+- Base benchmark: `iscas85_c6288`
+- Comparison: `last_out` (last output) vs `or` (disjunction of outputs)
+
+Each benchmark contains two directories:
+1. `src/`: Contains the source circuit AIGER file
+2. `trg/`: Contains the target circuit AIGER file
+
+Both directories may also include the original benchmark file in a different format.
+
+This structure allows for easy organization and access to various circuit comparisons across different benchmark families.
 
 ### NP-Equivalence Table Result
 First, please note that for NP-Equivalence you need to to allowed map with negated input with the parameter `/alg/allow_input_neg_map 1`.
