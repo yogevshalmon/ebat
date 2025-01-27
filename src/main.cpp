@@ -44,15 +44,42 @@ void PrintUsage()
     // additonal parameters
     cout << endl;
     cout << "additonal parameters can be provided in [additonal parameters]:" << endl;
-    cout << "Runnig example: \n\t ./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /general/print_matches 0" << endl;
+    cout << "Runnig example: \n\t ./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /general/print_matches 1" << endl;
 
     cout << endl;
-    cout << "General:" << endl;
+    cout << "General parameters:" << endl;
     cout << "[</general/timeout> <value>] provide timeout in seconds, if <value> not provided use default of " << DEF_TIMEOUT << " sec" << endl;
     cout << "[</general/print_matches> <0|1>] represent if to print the found matches" << endl;
+    cout << "[</alg/allow_input_neg_map> <0|1>] represent if to allow negated map to the inputs" << endl;
+    cout << "[</alg/stop_at_first_valid_match> <0|1>] represent if to stop at the first valid match" << endl;
 
     cout << endl;
-    cout << "Algorithm parameters:" << endl;
+    cout << "General algorithm parameters:" << endl;
+    cout << "[</alg/use_cirsim> <0|1>] represent if to use circuit simulation" << endl;
+    cout << "[</alg/use_top_to_bot_sim> <0|1>] represent if to use top to bottom simulation" << endl;
+    cout << "[</alg/use_ucore> <0|1>] represent if to use UnSAT core for valid match" << endl;
+    cout << "[</alg/use_lit_drop> <0|1>] represent if to use literal dropping for UnSAT core" << endl;
+    cout << "[</alg/lit_drop_conflict_limit> <value>] represent the limit of conflict in literal dropping" << endl;
+    cout << "[</alg/use_max_val_apprx_strat> <0|1>] represent if to use max value approx strat" << endl;
+    cout << "[</alg/use_adap_for_max_val_apprx_strat> <0|1>] represent if to use adaptive value strat for max val" << endl;
+    cout << "[</alg/max_val_apprx_strat_init_val> <value>] represent the init value for max val approx strat (either 1 -or- 0)" << endl;
+    cout << "[</alg/max_val_apprx_strat_boost_val> <value>] represent the boost value for each input" << endl;
+
+    cout << endl;
+    cout << "Blocking algorithm parameters:" << endl;
+    cout << "[</alg/block/block_match_type> <value>] represent the block match type with inputs values" << endl;
+    // cout << "[</alg/block/use_ipasir_for_plain> <0|1>] represent if to use ipasir for plain" << endl;
+    // cout << "[</alg/block/use_ipasir_for_dual> <0|1>] represent if to use ipasir for dual" << endl;
+    cout << "[</alg/block/use_ucore_for_valid_match> <0|1>] represent if to use UnSAT core for valid match" << endl;
+
+    cout << endl;
+    cout << "Iterative algorithm parameters:" << endl;
+    cout << "[/alg/iter/block_match_type <value>] represent the block match type with inputs values" << endl;
+    // cout << "[/alg/iter/eager_init_input_eq_assump <0|1>] represent if to eagerly init the input eq assumption" << endl;
+    // cout << "[/alg/iter/use_ipasir_for_plain <0|1>] represent if to use ipasir for plain" << endl;
+    // cout << "[/alg/iter/use_ipasir_for_dual <0|1>] represent if to use ipasir for dual" << endl;
+    cout << "[/alg/iter/use_ucore_for_valid_match <0|1>] represent if to use UnSAT core for valid match" << endl;
+
 }
 
 
@@ -85,40 +112,18 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    // no dual-rail if cmd option or mode is tersim
+    // the choosen algorithm
     string alg = cmdInput.getCmdOptionWDef("/alg", "iter");
-
-    string blockingEnc = cmdInput.getCmdOptionWDef("/alg/iter/enc", "tseitin");
 
     try
     {
         if (alg == "iter")
         {
-            if (blockingEnc == "tseitin")
-            {
-                boolMatchAlg = new BoolMatchAlgIterTseitinEnc(cmdInput);
-            }
-            // else if (blockingEnc == "dualrail")
-            // {
-            //     boolMatchAlg = new BoolMatchAlgIterDREnc(cmdInput);
-            // }
-            else
-            {
-                throw runtime_error("unkown blocking enc type provided");
-                return -1;
-            }
+            boolMatchAlg = new BoolMatchAlgIterTseitinEnc(cmdInput);
         }
         else if (alg == "block")
         {
-            if (blockingEnc == "tseitin")
-            {
-                boolMatchAlg = new BoolMatchAlgBlockTseitinEnc(cmdInput);
-            }
-            else
-            {
-                throw runtime_error("unkown blocking enc type provided");
-                return -1;
-            }
+            boolMatchAlg = new BoolMatchAlgBlockTseitinEnc(cmdInput);
         }
         else
         {
