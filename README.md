@@ -1,0 +1,3 @@
+# EBat - Enumerating All Boolean Matches Tool
+
+EBat solves the all Boolean matches problem...
