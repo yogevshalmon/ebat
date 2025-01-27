@@ -70,14 +70,27 @@ Both directories may also include the original benchmark file in a different for
 
 This structure allows for easy organization and access to various circuit comparisons across different benchmark families.
 
-### NP-Equivalence Table Result
-First, please note that for NP-Equivalence you need to to allowed map with negated input with the parameter `/alg/allow_input_neg_map 1`.
-We provide the default mode for the tool that achive the best result in the table for EbatC and EbatP algorithms, and how to remove\change part of the algorithm to reproduce the other lines in the table.
+Here's a revised version of the NP-Equivalence Table Result section:
 
-Available modes:
-- `/mode EBatC_NP_best`: EbatC + default blocking + BTS&MUC + Strengthening
-- `/mode EBatC_NP_best /alg/use_top_to_bot_sim 0`: EbatC + default blocking + FTS&MUC + Strengthening
-- `/mode EbatP_NP_best`: EbatP + default blocking + BTS&MUC + Strengthening
-- `/mode EBatC_NP_best /alg/use_ucore 0`: EbatC + default blocking + BTS + Strengthening
-- `/mode EBatC_NP_best /alg/block/use_ucore_for_valid_match 0`: EbatC + default blocking + BTS&MUC + No_Strengthening
-- `/mode BOOM_NP_base`: EBatS + default blocking + BTS + No_Strengthening
+### NP-Equivalence Table Result
+
+To reproduce the NP-Equivalence results, you must enable mapping with negated inputs using the parameter `/alg/allow_input_neg_map 1`.
+
+We provide several modes to reproduce different configurations reported in our paper. The default mode (`EBatC_NP_best`) achieves the best results for the EbatC algorithm. Other modes allow you to modify or remove specific parts of the algorithm to reproduce other results in the table.
+
+#### Available Modes
+
+| Mode | Description | Command |
+|------|-------------|---------|
+| EbatC (Best) | EbatC + default blocking + BTS&MUC + Strengthening | `/mode EBatC_NP_best` |
+| EbatC with FTS | EbatC + default blocking + FTS&MUC + Strengthening | `/mode EBatC_NP_best /alg/use_top_to_bot_sim 0` |
+| EbatP | EbatP + default blocking + BTS&MUC + Strengthening | `/mode EbatP_NP_best` |
+| EbatC without MUC | EbatC + default blocking + BTS + Strengthening | `/mode EBatC_NP_best /alg/use_ucore 0` |
+| EbatC without Strengthening | EbatC + default blocking + BTS&MUC + No Strengthening | `/mode EBatC_NP_best /alg/block/use_ucore_for_valid_match 0` |
+| BOOM (Baseline) | EbatS + default blocking + BTS + No Strengthening | `/mode BOOM_NP_base` |
+
+To use a specific mode, append the corresponding command to the tool execution. For example:
+
+```bash
+./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /alg/allow_input_neg_map 1 /mode EBatC_NP_best [other_parameters]
+```
