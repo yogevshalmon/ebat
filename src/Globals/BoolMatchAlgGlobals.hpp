@@ -26,7 +26,7 @@ static const std::vector<std::string> MODES = {
     NAIVE_ALG,
     EBATC_NP_BEST,
     EBATP_NP_BEST,
-    EBATC_P_BEST
+    EBATC_P_BEST,
     EBATP_P_BEST,
     BOOM_NP_BASE,
     BOOM_P_BASE
