@@ -29,8 +29,8 @@ void PrintUsage()
     cout << "USAGE: ./boolmatch_tool <source_file_path> <target_file_path> [</mode> <mode_name>] [additonal parameters]" << endl;
     cout << "where <source_file_path> is the path to a .aag or .aig instance in AIGER format of the source circuit"<< endl;
     cout << "where <target_file_path> is the path to a .aag or .aig instance in AIGER format of the target circuit"<< endl;
-
-    cout << "\t accepted <mode_name> are [";
+    cout << endl;
+    cout << "Accepted <mode_name> are [";
     for (size_t i = 0; i < MODES.size(); i++) {
         if (i != 0) {
             std::cout << ", ";
@@ -38,8 +38,9 @@ void PrintUsage()
         std::cout << MODES[i];
     }
     cout << "]" << endl;
-    cout << "\t for example: ./boolmatch_tool <input_file_name> /mode " << NAIVE_ALG << endl;
-    cout << "\t default mode is: " << NAIVE_ALG << endl;
+    cout << "\t for example: ./boolmatch_tool <input_file_name> /mode " << EBATC_NP_BEST << endl;
+    cout << "\t default mode is: " << EBATC_P_BEST << endl;
+    cout << "*** Please note that there are different modes for P and NP" << endl;
 
     // additonal parameters
     cout << endl;
