@@ -1,53 +1,64 @@
 # EBat - Enumerating All Boolean Matches Tool
 
-EBat solves the all Boolean matches problem, that is, given two (single-output combinational) circuits, it generates all the matches between the two ciruits.
+EBat solves the all Boolean matches problem, that is, given two (single-output combinational) circuits, it generates all the matches between the two circuits.
+
+## Table of Contents
+- [Project Description](#project-description)
+- [Prerequisites](#prerequisites)
+- [How to Build](#how-to-build)
+- [Usage](#usage)
+- [Reproducing Experiments](#reproducing-experiments)
 
 
-## How to build
+## Project Description
+EBat is a specialized tool designed to solve the all Boolean matches problem. It provides a comprehensive solution for generating matches between two single-output combinational circuits, offering researchers and engineers a powerful method for circuit comparison and analysis.
 
-Please consider the following before continuing: 
-- Compilation requires g++ version 10.1.0 or higher.
-- We use CMake for building the tool, please verify that you have CMake VERSION 3.8 or higher.
+## Prerequisites
+- Compilation requires g++ version 10.1.0 or higher
+- CMake VERSION 3.8 or higher
 
-To build the tool, first we assume the projet was unzip from the zip file, and the you enter the directory.
+## How to Build
+To build the tool, follow these steps:
 
-After that, run the following script:
+1. Unzip the project from the zip file
+2. Enter the project directory
+3. Run the build script:
 
-```
+```bash
 ./scripts/build_tool_from_zip.csh
 ```
 
-This will create new folder named "**build**" and will compile the tool in release mode.
+This will:
+- Create a new folder named "**build**"
+- Compile the tool in release mode
+- Generate the **boolmatch_tool** executable under the "**build**" folder
 
-Inside the new **build** folder the tool **boolmatch_tool** should be generated.
+## Usage
+After building, you can run the tool. For example, to see help options:
 
-After building the tool in the "build" directory, you should be able to run the tool, for example ask for help:
-
-```
+```bash
 ./boolmatch_tool -h
 ```
 
-## Reproducing the experiments in our SAT'24 submission
-
-This section lays out how to reproduce the experiments, reported in Tables 1 and 2 in our paper submission.
+## Reproducing Experiments
+This section details how to reproduce the experiments reported in Tables 1 and 2 of our SAT'24 submission.
 
 ### Benchmarks
+We used 388 benchmarks across 4 benchmark families. Benchmark files are located in the `benchmarks` directory with the structure:
 
-In total we used 388 benchmarks, consist of 4 benchmark families.
-Each benchmark exist under the benchmarks directory in the form `%BENCH_FAMILY_ORIG/%BENCH_BASED_ORIG/%BENCH/(src|trg)/(src|trg).aag`
+`benchmarks/%BENCH_FAMILY_ORIG/%BENCH_BASED_ORIG/%BENCH/(src|trg)/(src|trg).aag`
 
 For example `benchmarks/iscas85/iscas85_c6288/last_out-vs-or` mean we consider  the `iscas85` family where we take the benchmark `iscas85_c6288` and compare `last_out` (taking the last output) vs  `or` (the disjunction of the outputs).
 Under each benchmark we have two directories, `src`, and `trg` that contain the actual AIGER file (it may contain also the original benchmark file in different format).
 
-
-### Reproducing NP-Equivalence Table Result
-
+### NP-Equivalence Table Result
 First, please note that for NP-Equivalence you need to to allowed map with negated input with the parameter `/alg/allow_input_neg_map 1`.
 We provide the default mode for the tool that achive the best result in the table for EbatC and EbatP algorithms, and how to remove\change part of the algorithm to reproduce the other lines in the table.
 
+Available modes:
 - `/mode EBatC_NP_best`: EbatC + default blocking + BTS&MUC + Strengthening
-- `/mode EBatC_NP_best /alg/use_top_to_bot_sim 0`: EbatC + default blocking + **FTS&MUC** + Strengthening
-- `/mode EBatP_NP_best`: **EbatP** + default blocking + BTS&MUC + Strengthening
-- `/mode EBatC_NP_best /alg/use_ucore 0`: EbatC + default blocking + **BTS** + Strengthening
-- `/mode EBatC_NP_best /alg/block/use_ucore_for_valid_match 0`: EbatC + default blocking + BTS&MUC + **No_Strengthening**
+- `/mode EBatC_NP_best /alg/use_top_to_bot_sim 0`: EbatC + default blocking + FTS&MUC + Strengthening
+- `/mode EbatP_NP_best`: EbatP + default blocking + BTS&MUC + Strengthening
+- `/mode EBatC_NP_best /alg/use_ucore 0`: EbatC + default blocking + BTS + Strengthening
+- `/mode EBatC_NP_best /alg/block/use_ucore_for_valid_match 0`: EbatC + default blocking + BTS&MUC + No_Strengthening
 - `/mode BOOM_NP_base`: EBatS + default blocking + BTS + No_Strengthening
