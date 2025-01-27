@@ -188,7 +188,7 @@ protected:
     const bool m_UseMatchSelector;
 
     // the minimum group size for dynamic block to choose blocking instead of enforcing
-    static const size_t DYNAMIC_BLOCK_MIN_GROUP_SIZE = 4;
+    static const size_t DYNAMIC_BLOCK_MIN_GROUP_SIZE = 3;
 
     // *** Variables ***
 
