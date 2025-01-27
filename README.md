@@ -9,7 +9,7 @@ Please consider the following before continuing:
 - Compilation requires g++ version 10.1.0 or higher.
 - We use CMake for building the tool, please verify that you have CMake VERSION 3.8 or higher.
 
-To build the tool please extract the zip folder and then enter the new directory.
+To build the tool, first we assume the projet was unzip from the zip file, and the you enter the directory.
 
 After that, run the following script:
 
