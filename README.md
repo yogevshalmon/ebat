@@ -82,7 +82,7 @@ We provide several modes to reproduce different configurations reported in our p
 | Mode | Description | Command |
 |------|-------------|---------|
 | EbatC (Best) | EbatC + default blocking + BTS&MUC + Strengthening | `/mode EBatC_NP_best` |
-| EbatC with FTS | EbatC + default blocking + FTS&MUC + Strengthening | `/mode EBatC_NP_best /alg/use_top_to_bot_sim 0` |
+| EbatC with FTS&MUC | EbatC + default blocking + FTS&MUC + Strengthening | `/mode EBatC_NP_best /alg/use_top_to_bot_sim 0` |
 | EbatP | EbatP + default blocking + BTS&MUC + Strengthening | `/mode EbatP_NP_best` |
 | EbatC without MUC | EbatC + default blocking + BTS + Strengthening | `/mode EBatC_NP_best /alg/use_ucore 0` |
 | EbatC without Strengthening | EbatC + default blocking + BTS&MUC + No Strengthening | `/mode EBatC_NP_best /alg/block/use_ucore_for_valid_match 0` |
