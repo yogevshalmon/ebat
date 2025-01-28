@@ -41,7 +41,8 @@ After building, you can run the tool. For example, to see help options:
 ```
 
 ## Reproducing Experiments
-This section details how to reproduce the experiments reported in our Table 1 of our paper submission.
+This section provides detailed instructions for reproducing the experimental results presented in Table 1 of our CAV'25 paper submission.
+
 
 ### Benchmark Structure
 We used 388 benchmarks across 4 benchmark families. Benchmark files are located in the `benchmarks` directory and are organized in a hierarchical structure:
@@ -70,13 +71,11 @@ Both directories may also include the original benchmark file in a different for
 
 This structure allows for easy organization and access to various circuit comparisons across different benchmark families.
 
-Here's a revised version of the NP-Equivalence Table Result section:
-
 ### NP-Equivalence Table Result
 
 To reproduce the NP-Equivalence results, you must enable mapping with negated inputs using the parameter `/alg/allow_input_neg_map 1`.
 
-We provide several modes to reproduce different configurations reported in our paper. The default mode (`EBatC_NP_best`) achieves the best results for the EbatC algorithm. Other modes allow you to modify or remove specific parts of the algorithm to reproduce other results in the table.
+We provide several modes to reproduce different configurations reported in our paper. The mode (`EBatC_NP_best`) achieves the best results overall. Other modes allow you to modify or remove specific parts of the algorithm to reproduce other results in the table.
 
 #### Available Modes
 
@@ -94,3 +93,19 @@ To use a specific mode, append the corresponding command to the tool execution. 
 ```bash
 ./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /alg/allow_input_neg_map 1 /mode EBatC_NP_best [other_parameters]
 ```
+
+### P-Equivalence Table Result
+
+Similar to the NP-Equivalence Table Result, we provide several modes to reproduce different configurations reported in our paper.
+The default mode (`EBatC_P_best`) achieves the best results for the EbatC algorithm under P-Equivalence. Other modes allow you to modify or remove specific parts of the algorithm to reproduce other results in the table.
+
+| Mode | Description | Command |
+|------|-------------|---------|
+| EbatC (Best) | EbatC + dynamic blocking + Alternation + Strengthening | `/mode EBatC_P_best` |
+| EbatC with Enforce | EbatC + enforce blocking + Alternation + Strengthening | `/mode EBatC_P_best /alg/block/block_match_type 1` |
+| EbatP | EbatP + dynamic blocking + Alternation + Strengthening | `/mode EBatP_P_best` |
+| EbatC with Fix to 0 | EbatC + dynamic blocking + Fixed to 0 + Strengthening | `/mode EBatC_P_best /alg/use_adap_for_max_val_apprx_strat 0 /alg/max_val_apprx_strat_init_val 0` |
+| EbatC with Fix to 1 | EbatC + dynamic blocking + Fixed to 1 + Strengthening | `/mode EBatC_P_best /alg/use_adap_for_max_val_apprx_strat 0 /alg/max_val_apprx_strat_init_val 1` |
+| EbatC without Strengthening | EbatC + dynamic blocking + Alternation + No Strengthening | `/mode EBatC_P_best /alg/block/use_ucore_for_valid_match 0` |
+| EbatC without Witness-Extension | EbatC + dynamic blocking + _ + Strengthening | `/mode EBatC_P_best /alg/use_max_val_apprx_strat 0` |
+| BOOM (Baseline) | EbatS + enforce blocking + _ + No Strengthening | `/mode BOOM_P_base` |
