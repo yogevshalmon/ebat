@@ -71,4 +71,8 @@ static const std::unordered_map<std::string, std::vector<std::string>> MODE_PARA
         "/alg/use_cirsim", "1", 
         "/alg/use_top_to_bot_sim", "1"
     }},
+    {BOOM_P_BASE, {
+        "/alg", "block",
+        "/alg/block/block_match_type", "1"
+    }}
 };
