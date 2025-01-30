@@ -1,6 +1,6 @@
-# EBat - Enumerating All Boolean Matches Tool
+# EBat - an all-Boolean-matching tool (attached to a CAV'25 submission "Enumerating All Boolean Matches")
 
-EBat solves the all Boolean matches problem, that is, given two (single-output combinational) circuits, it generates all the matches between the two circuits.
+EBat solves the all-Boolean-matching problem, that is, given two (single-output combinational) circuits, it generates all the matches between the two circuits (non-disjoint).
 
 ## Table of Contents
 - [Project Description](#project-description)
@@ -11,7 +11,7 @@ EBat solves the all Boolean matches problem, that is, given two (single-output c
 
 
 ## Project Description
-EBat is a specialized tool designed to solve the all Boolean matches problem. It provides a comprehensive solution for generating matches between two single-output combinational circuits, offering researchers and engineers a powerful method for circuit comparison and analysis.
+EBat is a dedicated tool for all-Boolean-matching problem. It provides a comprehensive solution for generating matches between two single-output combinational circuits, offering researchers and engineers a powerful method for circuit comparison and analysis.
 
 ## Prerequisites
 - Compilation requires g++ version 10.1.0 or higher
@@ -41,7 +41,9 @@ After building, you can run the tool. For example, to see help options:
 ```
 
 ## Reproducing Experiments
-This section provides detailed instructions for reproducing the experimental results presented in Table 1 of our CAV'25 paper submission.
+This section provides detailed instructions for reproducing the experimental results presented in Table 1 of our CAV'25 submission.
+
+We conducted our experiments with a timeout of 60 seconds, which is also the default timeout setting for the tool. You can adjust the timeout using the parameter `/general/timeout ....`.
 
 
 ### Benchmark Structure
@@ -69,8 +71,6 @@ Each benchmark contains two directories:
 
 Both directories may also include the original benchmark file in a different format.
 
-This structure allows for easy organization and access to various circuit comparisons across different benchmark families.
-
 ### NP-Equivalence Table Result
 
 To reproduce the NP-Equivalence results, you must enable mapping with negated inputs using the parameter `/alg/allow_input_neg_map 1`.
@@ -97,7 +97,7 @@ To use a specific mode, append the corresponding command to the tool execution. 
 ### P-Equivalence Table Result
 
 Similar to the NP-Equivalence Table Result, we provide several modes to reproduce different configurations reported in our paper.
-The default mode (`EBatC_P_best`) achieves the best results for the EbatC algorithm under P-Equivalence. Other modes allow you to modify or remove specific parts of the algorithm to reproduce other results in the table.
+The mode (`EBatC_P_best`) achieves the best results for the EbatC algorithm under P-Equivalence. Other modes allow you to modify or remove specific parts of the algorithm to reproduce other results in the table.
 
 | Mode | Description | Command |
 |------|-------------|---------|
