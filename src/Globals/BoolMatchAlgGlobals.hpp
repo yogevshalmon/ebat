@@ -23,19 +23,18 @@ static const std::string BOOM_P_BASE = "BOOM_P_base";
 
 // pre-configured algorithms modes
 static const std::vector<std::string> MODES = {
-    NAIVE_ALG,
     EBATC_NP_BEST,
     EBATP_NP_BEST,
     EBATC_P_BEST,
     EBATP_P_BEST,
     BOOM_NP_BASE,
-    BOOM_P_BASE
+    BOOM_P_BASE,
+    NAIVE_ALG
 };
 
 
 static const std::unordered_map<std::string, std::vector<std::string>> MODE_PARAMS
 {
-    {NAIVE_ALG, {}},
     {EBATC_NP_BEST, {
         "/alg", "block",
         "/alg/use_cirsim", "1", 
@@ -74,5 +73,6 @@ static const std::unordered_map<std::string, std::vector<std::string>> MODE_PARA
     {BOOM_P_BASE, {
         "/alg", "block",
         "/alg/block/block_match_type", "1"
-    }}
+    }},
+    {NAIVE_ALG, {}}
 };

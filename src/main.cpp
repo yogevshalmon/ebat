@@ -27,8 +27,8 @@ void PrintUsage()
 {
     // TODO add additonal param like outfile, max models etc..
     cout << "USAGE: ./boolmatch_tool <source_file_path> <target_file_path> [</mode> <mode_name>] [additonal parameters]" << endl;
-    cout << "where <source_file_path> is the path to a .aag or .aig instance in AIGER format of the source circuit"<< endl;
-    cout << "where <target_file_path> is the path to a .aag or .aig instance in AIGER format of the target circuit"<< endl;
+    cout << "\twhere <source_file_path> is the path to a .aag or .aig instance in AIGER format of the source circuit"<< endl;
+    cout << "\twhere <target_file_path> is the path to a .aag or .aig instance in AIGER format of the target circuit"<< endl;
     cout << endl;
     cout << "Accepted <mode_name> are [";
     for (size_t i = 0; i < MODES.size(); i++) {
@@ -38,21 +38,21 @@ void PrintUsage()
         std::cout << MODES[i];
     }
     cout << "]" << endl;
-    cout << "\t for example: ./boolmatch_tool <input_file_name> /mode " << EBATC_NP_BEST << endl;
-    cout << "\t default mode is: " << EBATC_P_BEST << endl;
+    cout << "\t For example: ./boolmatch_tool <input_file_name> /mode " << EBATC_P_BEST << endl;
+    cout << "\t Note, the default mode is a basic naive iterative algorithm (EBatP) without any parameters [" << NAIVE_ALG << "]" << endl;
     cout << "*** Please note that there are different modes for P and NP" << endl;
 
     // additonal parameters
     cout << endl;
-    cout << "additonal parameters can be provided in [additonal parameters]:" << endl;
+    cout << "Additonal parameters can be provided in [additonal parameters]:" << endl;
     cout << "Runnig example: \n\t ./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /general/print_matches 1" << endl;
 
     cout << endl;
     cout << "General parameters:" << endl;
     cout << "[</general/timeout> <value>] provide timeout in seconds, if <value> not provided use default of " << DEF_TIMEOUT << " sec" << endl;
-    cout << "[</general/print_matches> <0|1>] represent if to print the found matches" << endl;
-    cout << "[</alg/allow_input_neg_map> <0|1>] represent if to allow negated map to the inputs" << endl;
-    cout << "[</alg/stop_at_first_valid_match> <0|1>] represent if to stop at the first valid match" << endl;
+    cout << "[</general/print_matches> <0|1>] represent if to print the found matches, by default it is false" << endl;
+    cout << "[</alg/allow_input_neg_map> <0|1>] represent if to allow negated map to the inputs, by default it is false" << endl;
+    cout << "[</alg/stop_at_first_valid_match> <0|1>] represent if to stop at the first valid match, by default it is false" << endl;
 
     cout << endl;
     cout << "General algorithm parameters:" << endl;
