@@ -1,4 +1,4 @@
-# EBat - an all-Boolean-matching tool (attached to a CAV'25 submission "Enumerating All Boolean Matches")
+# EBat - an all-Boolean-matching tool
 
 EBat solves the all-Boolean-matching problem, that is, given two (single-output combinational) circuits, it generates all the matches between the two circuits (non-disjoint).
 
@@ -19,6 +19,19 @@ EBat is a dedicated tool for all-Boolean-matching problem. It provides a compreh
 
 ## How to Build
 To build the tool, follow these steps:
+
+### Option 1: Clone the Repository
+Clone the repository and run these commands (after entering the repository directory):
+
+```
+git submodule init
+git submodule update
+cmake -S . -B build
+cd build
+make
+```
+
+### Option 2: Download the Project as a Zip File
 
 1. Unzip the project from the zip file
 2. Enter the project directory
