@@ -54,9 +54,9 @@ After building, you can run the tool. For example, to see help options:
 ```
 
 ## Reproducing Experiments
-This section provides detailed instructions for reproducing the experimental results presented in Table 1 of our CAV'25 submission.
+This section provides detailed instructions for reproducing the experimental results presented in Table 1 of our SAT'25 paper.
 
-We conducted our experiments with a timeout of 60 seconds, which is also the default timeout setting for the tool. You can adjust the timeout using the parameter `/general/timeout ....`.
+We conducted our experiments with a timeout of 60 seconds. Note that by default there is not timeout for the tool. You can adjust the timeout using the parameter `/general/timeout ....`.
 
 
 ### Benchmark Structure
@@ -104,7 +104,7 @@ We provide several modes to reproduce different configurations reported in our p
 To use a specific mode, append the corresponding command to the tool execution. For example:
 
 ```bash
-./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /alg/allow_input_neg_map 1 /mode EBatC_NP_best [other_parameters]
+./boolmatch_tool ../benchmarks/AND.aag ../benchmarks/AND.aag /general/timeout 60 /alg/allow_input_neg_map 1 /mode EBatC_NP_best [other_parameters]
 ```
 
 ### P-Equivalence Table Result
